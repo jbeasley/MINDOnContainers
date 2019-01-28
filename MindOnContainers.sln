@@ -1,0 +1,31 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Attachment.API", "src\Services\Attachment\Attachment.API\Attachment.API.csproj", "{BBDF1660-EA50-4455-B77D-38A76EB57459}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Attachment.Domain", "src\Services\Attachment\Attachment.Domain\Attachment.Domain.csproj", "{B70408EA-7B40-40D5-9032-7FA9E114B6C5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Attachment.Infrastructure", "src\Services\Attachment\Attachment.Infrastructure\Attachment.Infrastructure.csproj", "{DE5999E6-E41B-46A0-B52E-2B7723C57C68}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BBDF1660-EA50-4455-B77D-38A76EB57459}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BBDF1660-EA50-4455-B77D-38A76EB57459}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BBDF1660-EA50-4455-B77D-38A76EB57459}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BBDF1660-EA50-4455-B77D-38A76EB57459}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B70408EA-7B40-40D5-9032-7FA9E114B6C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B70408EA-7B40-40D5-9032-7FA9E114B6C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B70408EA-7B40-40D5-9032-7FA9E114B6C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B70408EA-7B40-40D5-9032-7FA9E114B6C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE5999E6-E41B-46A0-B52E-2B7723C57C68}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE5999E6-E41B-46A0-B52E-2B7723C57C68}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE5999E6-E41B-46A0-B52E-2B7723C57C68}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE5999E6-E41B-46A0-B52E-2B7723C57C68}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+	EndGlobalSection
+EndGlobal
