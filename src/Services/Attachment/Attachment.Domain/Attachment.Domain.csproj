@@ -28,9 +28,50 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Net.IPNetwork">
+      <HintPath>..\..\..\..\packages\IPNetwork2.2.2.0.78\lib\net46\System.Net.IPNetwork.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="DomainModels\IGenericRepository.cs" />
+    <Compile Include="DomainModels\AttachmentAggregate\Attachment.cs" />
+    <Compile Include="DomainModels\AttachmentAggregate\Interface.cs" />
+    <Compile Include="SeedWork\Entity.cs" />
+    <Compile Include="SeedWork\Enumeration.cs" />
+    <Compile Include="SeedWork\IAggregateRoot.cs" />
+    <Compile Include="SeedWork\IRepository.cs" />
+    <Compile Include="SeedWork\IUnitOfWork.cs" />
+    <Compile Include="SeedWork\ValueObject.cs" />
+    <Compile Include="DomainModels\AttachmentAggregate\Port.cs" />
+    <Compile Include="DomainModels\AttachmentAggregate\Vif.cs" />
+    <Compile Include="DomainModels\AttachmentAggregate\Vlan.cs" />
+    <Compile Include="DomainModels\AttachmentAggregate\ContractBandwidthPool.cs" />
+    <Compile Include="DomainModels\AttachmentAggregate\AttachmentRole.cs" />
+    <Compile Include="DomainModels\AttachmentAggregate\ContractBandwidth.cs" />
+    <Compile Include="DomainModels\AttachmentAggregate\Mtu.cs" />
+    <Compile Include="DomainModels\AttachmentAggregate\VifRole.cs" />
+    <Compile Include="DomainModels\AttachmentAggregate\VlanTagRange.cs" />
+    <Compile Include="Exceptions\AttachmentDomainException.cs" />
+    <Compile Include="DomainModels\AttachmentAggregate\AttachmentBuilder.cs" />
+    <Compile Include="DomainModels\AttachmentAggregate\PortStatus.cs" />
+    <Compile Include="DomainModels\AttachmentAggregate\Device.cs" />
+    <Compile Include="DomainModels\AttachmentAggregate\BundleAttachment.cs" />
+    <Compile Include="DomainModels\AttachmentAggregate\Ipv4AddressAndMask.cs" />
+    <Compile Include="DomainModels\AttachmentAggregate\RoutingInstance.cs" />
+    <Compile Include="DomainModels\AttachmentAggregate\BgpPeer.cs" />
+    <Compile Include="DomainModels\AttachmentAggregate\DeviceRole.cs" />
+    <Compile Include="DomainModels\AttachmentAggregate\DeviceRoleAttachmentRole.cs" />
+    <Compile Include="DomainModels\AttachmentAggregate\RoutingInstanceType.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Exceptions\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

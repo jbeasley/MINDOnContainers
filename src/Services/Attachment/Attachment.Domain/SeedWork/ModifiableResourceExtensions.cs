@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Linq;
 
-namespace Mind.Models
+namespace MINDOnContainers.Services.Attachment.Domain.SeedWork
 {
     using System;
-    using System.Globalization;
     using System.Linq;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.Net.Http.Headers;
 
     public static class ModifiableResourceExtensions
     {

@@ -15,9 +15,6 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Primitives;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
@@ -29,7 +26,6 @@ using Microsoft.EntityFrameworkCore;
 using Mind.Builders;
 using Mind.Models;
 using Swashbuckle.AspNetCore.Annotations;
-using IO.NovaAttSwagger.Client;
 
 namespace Mind.Api.Controllers
 { 

@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Microsoft.eShopOnContainers.Services.Ordering.Domain.Seedwork
+namespace MINDOnContainers.Services.Attachment.Domain.SeedWork
 {
     public interface IUnitOfWork : IDisposable
     {        

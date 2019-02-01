@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace Microsoft.eShopOnContainers.Services.Ordering.Domain.SeedWork
+namespace MINDOnContainers.Services.Attachment.Domain.SeedWork
 {
     public abstract class Enumeration : IComparable
     {
@@ -11,13 +11,16 @@ namespace Microsoft.eShopOnContainers.Services.Ordering.Domain.SeedWork
 
         public int Id { get; private set; }
 
+        public int? Value { get; private set; }
+
         protected Enumeration()
         { }
 
-        protected Enumeration(int id, string name)
+        protected Enumeration(int id, string name, int? value = null)
         {
             Id = id;
             Name = name;
+            Value = value;
         }
 
         public override string ToString() => Name;
