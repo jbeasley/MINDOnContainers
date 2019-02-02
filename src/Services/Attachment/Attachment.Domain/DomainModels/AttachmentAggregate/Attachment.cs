@@ -7,86 +7,112 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
 {
     public class Attachment : Entity, IAggregateRoot
     {
-        // DDD Patterns comment
-        // Using private fields, allowed since EF Core 1.1, is a much better encapsulation
-        // aligned with DDD Aggregates and Domain Entities (instead of properties and property collections)
+        public string Name { get; private set; }
         private readonly string _description;
         private readonly string _notes;
         private readonly bool _isTagged;
         private readonly bool _isLayer3;
-        private readonly int _attachmentBandwidthID;
         private readonly int? _tenantId;
-        private readonly int _deviceId;
+        private readonly AttachmentBandwidth _attachmentBandwidth;
         private readonly Device _device;
         private readonly RoutingInstance _routingInstance;
-        private readonly int? _contractBandwidthPoolId;
-        private readonly int _attachmentRoleId;
+        private readonly List<ContractBandwidthPool> _contractBandwidthPools;
         private readonly AttachmentRole _attachmentRole;
-        private readonly int _mtuId;
+        private readonly Mtu _mtu;
+        private readonly List<Interface> _interfaces;
+        private readonly List<Vif> _vifs;
         private readonly  bool _created;
         private readonly NetworkStatus _networkStatus;
 
-        // DDD Patterns comment
-        // Using a private collection field, better for DDD Aggregate's encapsulation
-        // so Interfaces cannot be added from "outside the AggregateRoot" directly to the collection,
-        // but only through the method Attachment.AddInterface() which includes behaviour.
-        private readonly List<Interface> _interfaces;
-        public IReadOnlyCollection<Interface> Interfaces => _interfaces;
-
-        private readonly List<Vif> _vifs;
-        public IReadOnlyCollection<Vif> _vifs => _vifs;
-
-        public Attachment(string description, string notes, int attachmentBandwidthId, int? tenantId = null, int? routingInstanceId = null, 
-        AttachmentRole attachmentRole, int mtuId, Device device, List<Ipv4AddressAndMask> ipv4Addresses)
+        protected Attachment()
         {
+            _contractBandwidthPools = new List<ContractBandwidthPool>();
+            _interfaces = new List<Interface>();
+            _vifs = new List<Vif>();
+        }
+
+        public Attachment(string description, string notes, AttachmentBandwidth attachmentBandwidth, RoutingInstance routingInstance, 
+        AttachmentRole role, Mtu mtu, Device device, List<Ipv4AddressAndMask> ipv4Addresses, int? tenantId = null) : this()
+        {
+            // The supplied attachment role must be compatible with the supplied device
             if (!device.DeviceRole.DeviceRoleAttachmentRoles.Contains(attachmentRole))
             {
                 throw new AttachmentDomainException($"Attachment role '{attachmentRole.Name}' is not valid for device '{device.Name}' ");
             }
+
+            // Must have a tenant specified for a tenant-facing attachment
+            if (role.IsTenantFacing)
+            {
+                if (!_tenantId.HasValue)
+                {
+                    throw new ArgumentNullException(nameof(tenantId));
+                }
+
+                _tenantId = tenantId;
+            }
+
+            _name = Guid.NewGuid('N');
+            _device = device ?? throw new ArgumentNullException(nameof(device));
+            _attachmentRole = attachmentRole ?? throw new ArgumentNullException(nameof(attachmentRole));
+            _attachmentBandwidth = attachmentBandwidth ?? throw new ArgumentNullException(nameof(attachmentBandwidth));
             _description = description ?? throw new ArgumentNullException(nameof(description));
             _notes = notes;
-            _tenantId = tenantId;
-            _attachmentRole = attachmentRole;
-            _attachmentBandwidthID = attachmentBandwidthId;
             _isLayer3 = attachmentRole.IsLayer3Role;
             _isTagged = attachmentRole.IsTaggedRole;
             _created = true;
-        }
-
-        protected internal virtual void CreateInterfaces()
-        {
-
-        }
-
-        public void AddInterface(string ipv4Address = null, string ipv4SubnetMask = null)
-        {
-            if (_isLayer3)
+            _mtu = mtu ?? throw new ArgumentNullException(nameof(mtu));
+            if (role.RequireRoutingInstance)
             {
-                // A layer 3 Attachment must have IP address and subnet supplied for each of its interfaces
-                if (string.IsNullOrEmpty(ipv4Address))
+                if (routingInstance != null)
                 {
-                    throw new AttachmentDomainException("An interface for a layer 3 attachment must be given an IPv4 address.");
+                    if (routingInstance.RoutingInstanceType)
                 }
-
-                if (string.IsNullOrEmpty(ipv4SubnetMask))
+                else
                 {
-                    throw new AttachmentDomainException("An interface for a layer 3 attachment must be given an IPv4 subnet mask.");
+                    CreateRoutingInstance();
                 }
             }
-            else
-            {   // A non-layer 3 Attachment must NOT have IP address and subnet supplied for any of its interfaces
-                if (!string.IsNullOrEmpty(ipv4Address))
-                {
-                    throw new AttachmentDomainException("An interface for a layer 3 attachment must NOT be given an IPv4 address.");
-                }
+        }
 
-                if (!string.IsNullOrEmpty(ipv4SubnetMask))
+        public void AddVif(bool isLayer3, VifRole role, VlanTagRange vlanTagRange, Mtu mtu,
+            RoutingInstance routingInstance, ContractBandwidthPool contractBandwidthPool,
+            List<Ipv4AddressAndMask> ipv4Addresses, int? tenantId, int? vlanTag = null)
+        {
+            if (!this._isTagged)
+            {
+                throw new AttachmentDomainException($"A Vif cannot be created for attachment '{this.Name}' because the attachment is not enabled for tagging. ");
+            }
+
+            if (vlanTag.HasValue)
+            {
+                // Validate that the supplied vlan tag is unique
+                if (this.Vifs.Select(vif => vif.VlanTag).Contains(vlanTag.Value))
                 {
-                    throw new AttachmentDomainException("An interface for a layer 3 attachment must NOT be given an IPv4 subnet mask.");
+                    throw new AttachmentDomainException($"Vlan tag '{vlanTag}' is already used.");
                 }
             }
 
-            this.AddInterface(new Interface(ipv4Address, ipv4SubnetMask));
+            if (contractBandwidthPool != null)
+            {
+                // Validate the contract bandwidth pool belongs to this attachment
+                if (!this._contractBandwidthPools.Contains(p => contractBandwidthPool == p))
+                {
+                    throw new AttachmentDomainException($"The supplied contract bandwidth pool does not exist or does not belong to attachment '{this.Name}'.");
+                }
+            }
+
+            if (routingInstance != null)
+            {
+                // Validate the routing instance belongs to the device for this attachment
+                if (!this._device.RoutingInstances.Contains(r => routingInstance == r))
+                {
+                    throw new AttachmentDomainException($"The supplied routing instance does not exist or does not belong to attachment '{this.Name}'.");
+                }
+            }
+
+            var vif = new Vif(isLayer3, vlanTagRange, mtu, routingInstance, contractBandwidthPool, ipv4Addresses, tenantId, vlanTag);
+
+            this._vifs.Add(vif);
         }
 
         /// <summary>
@@ -98,11 +124,39 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
             // Additional logic before deleting a vif 
             this._vifs.Remove(vif);
         }
+
+        protected internal virtual List<Port> AssignPorts(int numPortRequired, int portBandwidthRequiredGbps)
+        {
+            List<Port> ports = this._device.Ports.Where(
+                                   port =>
+                                   port.GetPortStatus() == PortStatus.Free &&
+                                   port.GetPortBandwidth() == portBandwidthRequiredGbps &&
+                                   port.GetPortPoolId() == this.AttachmentRole.PortPoolId)
+                                   .Take(numPortsRequired);
+
+            // Check we have the required number of ports - the 'take' method will only return the number of ports found which may be 
+            // less than the required number
+            if (ports.Count() != numPortsRequired) throw new AttachmentDomainException("Could not find a sufficient number of free ports " +
+                $"matching the requirements. {numPortsRequired} ports of {portBandwidthRequiredGbps} Gbps are required but {ports.Count()} free ports were found.");
+
+            ports.ForEach(port => port.Assign(this._tenantId);
+            return ports;
+        }
+
+        protected internal virtual void CreateInterfaces(List<Ipv4AddressAndMask> ipv4Addresses, List<Port> ports)
+        {
+            var @interface = new Interface(ports: ports);
+            if (_isLayer3)
+            {
+                @interface.SetIpv4Address(ipv4Addresses.FirstOrDefault());
+            }
+
+            this._interfaces.Add(@interface);
+        }
                 
         /// <summary>
         /// Release ports of the attachment back to inventory.
         /// </summary>
-        /// <returns>An awaitable task</returns>
         protected internal virtual void ReleasePortsAsync()
         {
             var ports = this.Interfaces.SelectMany(@interface => @interface.Ports)
@@ -110,168 +164,9 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
                                                    .ForEach(port => port.Release());
         }
 
-        /// <summary>
-        /// Validate the state of the attachment.
-        /// </summary>
-        public virtual void Validate()
+        protected CreateRoutingInstance(RoutingInstanceType routingInstanceType)
         {
-            if (this.Mtu == null) throw new IllegalStateException("An MTU is required for the attachment.");
-            if (this.AttachmentBandwidth == null) throw new IllegalStateException("An attachment bandwidth is required for the attachment.");
-            if (this.AttachmentRole == null) throw new IllegalStateException("An attachment role is required for the attachment.");
-            if (this.Device == null) throw new IllegalStateException("A device is required for the attachment.");
-            if (!this.Interfaces.Any()) throw new IllegalStateException("At least one interface is required for the attachment.");
-            if (!this.Device.DeviceRole.DeviceRoleAttachmentRoles
-                .Any(
-                    x =>
-                    x.AttachmentRoleID == this.AttachmentRole.AttachmentRoleID))
-            {
-                throw new IllegalStateException($"The attachment role of '{this.AttachmentRole.Name}' is not valid for device '{this.Device.Name}' because " +
-                    $"the device is assigned to role '{this.Device.DeviceRole.Name}'.");
-            }
-            if (this.AttachmentRole.PortPool.PortRole.PortRoleType == PortRoleTypeEnum.TenantFacing && this.Tenant == null)
-            {
-                throw new IllegalStateException("A tenant association is required for the attachment in accordance with the attachment role of " +
-                    $"'{this.AttachmentRole.Name}'.");
-            }
-            else if (this.AttachmentRole.PortPool.PortRole.PortRoleType == PortRoleTypeEnum.ProviderInfrastructure && this.Tenant != null)
-            {
-                throw new IllegalStateException("A tenant association exists for the attachment but is NOT required in accordance with the " +
-                    $"attachment role of '{this.AttachmentRole.Name}'.");
-            }
-
-            if (this.RoutingInstance == null && this.AttachmentRole.RoutingInstanceTypeID.HasValue)
-                throw new IllegalStateException("Illegal routing instance state. A routing instance for the attachment is required in accordance " +
-                    $"with the requested attachment role of '{this.AttachmentRole.Name}' but was not found.");
-
-            if (this.RoutingInstance != null && !this.AttachmentRole.RoutingInstanceTypeID.HasValue)
-                throw new IllegalStateException("Illegal routing instance state. A routing instance for the attachment has been assigned but is " +
-                    $"not required for an attachment with attachment role of '{this.AttachmentRole.Name}'.");
-
-            if (this.RoutingInstance != null && this.AttachmentRole.RoutingInstanceType != null)
-            {
-                if (this.RoutingInstance.RoutingInstanceType.RoutingInstanceTypeID != this.AttachmentRole.RoutingInstanceTypeID)
-                {
-                    throw new IllegalStateException("Illegal routing instance state. The routing instance type for the attachment is different to that " +
-                        $"required by the attachment role. The routing instance type required is '{this.AttachmentRole.RoutingInstanceType.Type.ToString()}'. " +
-                        $"The routing instance type assigned to the attachment is '{this.RoutingInstance.RoutingInstanceType.Type.ToString()}'.");
-                }
-            }
-
-            if (this.IsLayer3)
-            {
-                if (this.Interfaces.Count(x => !string.IsNullOrEmpty(x.IpAddress) &&
-                !string.IsNullOrEmpty(x.SubnetMask)) != this.Interfaces.Count)
-                {
-                    throw new IllegalStateException("The attachment is enabled for layer 3 but insufficient IPv4 addresses have been requested.");
-                }
-            }
-            else if (this.Interfaces.Where(x => !string.IsNullOrEmpty(x.IpAddress) || !string.IsNullOrEmpty(x.SubnetMask)).Any())
-            {
-                throw new IllegalStateException("The attachment is NOT enabled for layer 3 but IPv4 addresses have been requested.");
-            }
-
-            if (this.AttachmentRole.RequireContractBandwidth)
-            {
-                if (this.ContractBandwidthPool?.ContractBandwidth == null)
-                {
-                    throw new IllegalStateException("A contract bandwidth for the attachment is required in accordance with the attachment role " +
-                        $"of '{this.AttachmentRole.Name}' but none is defined.");
-                }
-
-                if (this.ContractBandwidthPool.ContractBandwidth.BandwidthMbps > this.AttachmentBandwidth.BandwidthGbps * 1000)
-                {
-                    throw new IllegalStateException($"The requested contract bandwidth of " +
-                        $"{this.ContractBandwidthPool.ContractBandwidth.BandwidthMbps} Mbps is greater " +
-                        $"than the bandwidth of the attachment which is {this.AttachmentBandwidth.BandwidthGbps} Gbps.");
-                }
-            }
-            else
-            {
-                if (this.ContractBandwidthPool != null)
-                {
-                    throw new IllegalStateException("A contract bandwidth for the attachment is defined but is NOT required for the attachment role " +
-                        $"of '{this.AttachmentRole.Name}'.");
-                }
-            }
-
-            if (this.AttachmentRole.IsTaggedRole)
-            {
-                if (!this.IsTagged)
-                {
-                    throw new IllegalStateException("The attachment must be enabled for tagging with the 'isTagged' property in accordance with the " +
-                        $"attachment role of '{this.AttachmentRole.Name}'.");
-                }
-                if (this.IsLayer3) throw new IllegalStateException("Layer 3 cannot be enabled concurrently with a tagged attachment.");
-            }
-            else
-            {
-                if (this.Vifs.Any())
-                {
-                    throw new IllegalStateException("Vifs were found for the attachment but the attachment is not enabled for tagging with the 'isTagged' properrty.");
-                }
-            }
-
-            if (this.IsBundle)
-            {
-                if (!this.AttachmentRole.SupportedByBundle) throw new IllegalStateException($"The requested attachment role " +
-                $"'{this.AttachmentRole.Name}' is not supported with a bundle attachment.");
-
-                if (!this.AttachmentBandwidth.SupportedByBundle) throw new IllegalStateException($"The requested attachment " +
-                $"bandwidth '{this.AttachmentBandwidth.BandwidthGbps} Gbps' is not supported with a bundle attachment.");
-
-                var numPorts = this.Interfaces.SelectMany(x => x.Ports).Count();
-                if (this.BundleMinLinks > numPorts) throw new IllegalStateException($"The min links parameter for the bundle " +
-                    $"({this.BundleMinLinks}) must be " +
-                    $"less than or equal to the total number of ports required for the bundle ({numPorts}).");
-
-                if (this.BundleMaxLinks > numPorts) throw new IllegalStateException($"The max links parameter for the bundle " +
-                    $"({this.BundleMaxLinks}) must be " +
-                    $"less than or equal to the total number of ports required for the bundle ({numPorts}).");
-
-                if (this.BundleMinLinks > this.BundleMaxLinks) throw new IllegalStateException($"The min links parameter for the bundle " +
-                    $"({this.BundleMinLinks}) must be less then " +
-                    $"or equal to the max links parameter for the bundle ({this.BundleMaxLinks})");
-            }
-
-            if (this.IsMultiPort)
-            {
-                if (!this.AttachmentRole.SupportedByMultiPort) throw new IllegalStateException($"The requested attachment role " +
-                    $"'{this.AttachmentRole.Name}' is not supported with a multiport attachment.");
-
-                if (!this.AttachmentBandwidth.SupportedByMultiPort) throw new IllegalStateException($"The requested attachment " +
-                    $"bandwidth '{this.AttachmentBandwidth.BandwidthGbps} Gbps' is not supported with a multiport attachment.");
-            }
-
-            // Validate the routing instance if one exists
-            if (this.RoutingInstance != null)
-            {
-                this.RoutingInstance.Validate();
-            }
-        }
-
-        /// <summary>
-        /// Validates that the ports of a an attachment are configured correctly.
-        /// </summary>
-        protected virtual void ValidatePortsConfiguredCorrectly()
-        {
-            var totalPortBandwidthGbps = (this.Interfaces
-                                              .SelectMany(
-                                                 x =>
-                                                 x.Ports)
-                                               .Where(
-                                                 x =>
-                                                 x.DeviceID == this.DeviceID)
-                                               .Sum(
-                                                 x =>
-                                                 x.PortBandwidth.BandwidthGbps)
-                                         );
-
-            if (totalPortBandwidthGbps < this.AttachmentBandwidth.BandwidthGbps)
-            {
-                throw new IllegalStateException($"Attachment '{this.Name}' is misconfigured. The total port bandwidth "
-                    + $"({totalPortBandwidthGbps} Gbps) is less than the required attachment bandwidth ({this.AttachmentBandwidth.BandwidthGbps} Gbps). "
-                    + "Check that the correct number of ports are configured and that all of the ports are configured for the same device.");
-            }
-        }
+            var routingInstance = new RoutingInstance(device: this._device, routingInstanceType)
+        }              
     }
 }

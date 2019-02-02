@@ -9,7 +9,7 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
     public class Mtu : Enumeration
     {
         public static Mtu m1500 = new Mtu(1, nameof(m1500).ToLowerInvariant(), 1500);
-        public static Mtu m9000 = new Mtu(2, nameof(m9000).ToLowerInvariant()), 9000);
+        public static Mtu m9000 = new Mtu(2, nameof(m9000).ToLowerInvariant(), 9000);
 
         protected Mtu()
         {

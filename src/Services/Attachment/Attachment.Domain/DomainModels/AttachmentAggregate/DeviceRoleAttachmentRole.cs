@@ -4,7 +4,10 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
 {
     public class DeviceRoleAttachmentRole : ValueObject
     {
-        private int _deviceRoleID;
-        private int _attachmentRoleID;
+        private readonly DeviceRole _deviceRole;
+        private readonly AttachmentRole _attachmentRole;
+
+        public DeviceRole GetDeviceRole() => _deviceRole;
+        public AttachmentRole GetAttachmentRole() => _attachmentRole;
     }
 }

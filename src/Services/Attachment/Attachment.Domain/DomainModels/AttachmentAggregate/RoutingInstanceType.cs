@@ -1,31 +1,48 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
+﻿using System.Collections.Generic;
+using MINDOnContainers.Services.Attachment.Domain.SeedWork;
 
-namespace SCM.Models
+namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAggregate
 {
-    public enum RoutingInstanceTypeEnum
+    public class RoutingInstanceType : Enumeration
     {
-        TenantFacingVrf = 0,
-        Default = 1,
-        InfrastructureVrf = 2
-    }
+        public static RoutingInstanceType Default = new RoutingInstanceType(1, nameof(Default).ToLowerInvariant());
+        public static RoutingInstanceType ProviderDomainTenantFacingLayer3Vrf = new RoutingInstanceType(2, nameof(ProviderDomainTenantFacingLayer3Vrf).ToLowerInvariant());
+        public static RoutingInstanceType ProviderDomainInfrastructureVrf = new RoutingInstanceType(3, nameof(ProviderDomainTenantFacingLayer3Vrf).ToLowerInvariant());
 
-    public class RoutingInstanceType
-    {
-        public int RoutingInstanceTypeID { get; private set; }
-        [Required(AllowEmptyStrings = false)]
-        public RoutingInstanceTypeEnum Type { get; set; }
-        public string Description { get; set; }
-        public bool IsLayer3 { get; set; }
-        public bool IsVrf { get; set; }
-        public bool IsDefault { get; set; }
-        public bool IsInfrastructureVrf { get; set; }
-        public bool IsTenantFacingVrf { get; set; }
-        [Timestamp]
-        public byte[] RowVersion { get; set; }
-        public virtual ICollection<RoutingInstance> RoutingInstances { get; set; }
+        protected RoutingInstanceType()
+        {
+        }
+
+        public RoutingInstanceType(int id, string name) : base(id, name)
+        {
+        }
+
+        public static IEnumerable<RoutingInstanceType> List() =>
+                new[] { Default, ProviderDomainTenantFacingLayer3Vrf, ProviderDomainInfrastructureVrf };
+
+        public static RoutingInstanceType FromName(string name)
+        {
+            var state = List()
+                .SingleOrDefault(s => String.Equals(s.Name, name, StringComparison.CurrentCultureIgnoreCase));
+
+            if (state == null)
+            {
+                throw new OrderingDomainException($"Possible values for RoutingInstanceType: {String.Join(",", List().Select(s => s.Name))}");
+            }
+
+            return state;
+        }
+
+        public static RoutingInstanceType From(int id)
+        {
+            var state = List().SingleOrDefault(s => s.Id == id);
+
+            if (state == null)
+            {
+                throw new OrderingDomainException($"Possible values for RoutingInstanceType: {String.Join(",", List().Select(s => s.Name))}");
+            }
+
+            return state;
+        }
     }
 }

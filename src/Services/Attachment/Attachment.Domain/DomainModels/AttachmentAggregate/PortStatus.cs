@@ -1,4 +1,6 @@
 ﻿using System;
+using MINDOnContainers.Services.Attachment.Domain.SeedWork;
+
 namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAggregate
 {
     public class PortStatus : Enumeration
