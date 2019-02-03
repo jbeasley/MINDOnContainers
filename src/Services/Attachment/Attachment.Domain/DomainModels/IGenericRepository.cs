@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Data;
-using SCM.Models;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore.Query;
 
-namespace MINDOnContainers.Vif.API.Data
+namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAggregate
 {
     interface IGenericRepository<TEntity>
     {

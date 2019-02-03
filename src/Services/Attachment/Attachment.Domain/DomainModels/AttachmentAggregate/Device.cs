@@ -22,32 +22,40 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
 
         public Device(string name, DeviceRole deviceRole, List<Port> ports, List<RoutingInstance> routingInstances) : this()
         {
-            !string.IsNullOrEmpty(name) ? _name = name : throw new ArgumentNullException(nameof(name));
+            if (string.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
+            Name = name;
             DeviceRole = deviceRole ?? throw new ArgumentNullException(nameof(deviceRole));
 
             ports.ForEach(port => AddPort(port));
-            routingInstances.ForEach(routingInstance => AddRoutingInstance(routingInstance));
+            routingInstances.ForEach(AddRoutingInstance);
         }
 
-        public AddRoutingInstance(RoutingInstance routingInstance)
+        /// <summary>
+        /// Adds a routing instance to the device.
+        /// </summary>
+        /// <param name="routingInstance">Routing instance.</param>
+        public void AddRoutingInstance(RoutingInstance routingInstance)
         {
-            if (deviceRole.IsProviderDomainRole)
+            if (this.DeviceRole.IsProviderDomainRole)
             {
-                if (routingInstance.RoutingInstanceType == RoutingInstanceType.ProviderDomainTenantFacingLayer3Vrf ||
-                    RoutingInstanceType == RoutingInstanceType.ProviderDomainInfrastructureVrf)
+                if (routingInstance.RoutingInstanceType == RoutingInstanceType.Vrf)
                 {
                     _routingInstances.Add(routingInstance);
                 }
             }
         }
 
-        public AddPort(Port port)
+        /// <summary>
+        /// Adds a port to the device
+        /// </summary>
+        /// <param name="port">Port.</param>
+        public void AddPort(Port port)
         {
             // Get the collection of acceptable port pools for the device role of this device
             // The port can be added only if it belongs to an acceptable port pool
-            var acceptablePortPoolIds = deviceRole.GetPortPoolIds();
+            var acceptablePortPoolIds = this.DeviceRole.GetPortPoolIds();
 
-            if (acceptablePortPoolIds.Contains(port.GetPortPoolId())
+            if (acceptablePortPoolIds.Contains(port.GetPortPoolId()))
             {
                 _ports.Add(port);
             }

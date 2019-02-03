@@ -1,4 +1,6 @@
-﻿using MINDOnContainers.Services.Attachment.Domain.SeedWork;
+﻿using System;
+using System.Collections.Generic;
+using MINDOnContainers.Services.Attachment.Domain.SeedWork;
 using MINDOnContainers.Services.Attachment.Domain.Exceptions;
 
 namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAggregate
@@ -6,31 +8,48 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
     public class VlanTagRange : ValueObject
     {
         public string Name { get; private set; }
-        private readonly int _startValue;
-        private readonly int _endValue;
-    }
+        public int StartValue { get; private set; }
+        public int EndValue { get; private set; }
 
-    public VlanTagRange(string name, int startValue, int endValue)
-    {
-        !string.IsNullOrEmpty(name) ? Name = name : throw new NullValueException("A name is required to create a new vlan tag range.");
-
-        if (startValue < 2 || startValue > 4093)
+        private VlanTagRange()
         {
-            throw new AttachmentDomainException($"The start value for a vlan tag range '{name}' must be between 2 and 4093.");
         }
 
-        if (endValue < 3 || endValue > 4094)
+        public VlanTagRange(string name, int startValue, int endValue)
         {
-            throw new AttachmentDomainException($"The end value for vlan tag range '{name}' must be between 3 and 4094.");
+            if (string.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
+            Name = name;
+
+            if (startValue < 2 || startValue > 4093)
+            {
+                throw new AttachmentDomainException($"The start value for a vlan tag range '{name}' must be between 2 and 4093.");
+            }
+
+            if (endValue < 3 || endValue > 4094)
+            {
+                throw new AttachmentDomainException($"The end value for vlan tag range '{name}' must be between 3 and 4094.");
+            }
+
+            if (startValue >= endValue)
+            {
+                throw new AttachmentDomainException($"The start value for vlan tag range '{name}' must be less than the end value.");
+            }
+
+            StartValue = startValue;
+            EndValue = endValue;
+
         }
 
-        if (startValue >= endValue)
+        public int GetCount()
         {
-            throw new AttachmentDomainException($"The start value for vlan tag range '{name}' must be less than the end value.");
+            return EndValue - StartValue + 1;
         }
 
-        _startValue = startValue;
-        _endValue = endValue;
-
+        protected override IEnumerable<object> GetAtomicValues()
+        {
+            yield return Name;
+            yield return StartValue;
+            yield return EndValue;
+        }
     }
 }

@@ -1,14 +1,16 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using System;
 using MINDOnContainers.Services.Attachment.Domain.SeedWork;
+using MINDOnContainers.Services.Attachment.Domain.Exceptions;
 
 namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAggregate
 {
     public class RoutingInstanceType : Enumeration
     {
         public static RoutingInstanceType Default = new RoutingInstanceType(1, nameof(Default).ToLowerInvariant());
-        public static RoutingInstanceType ProviderDomainTenantFacingLayer3Vrf = new RoutingInstanceType(2, nameof(ProviderDomainTenantFacingLayer3Vrf).ToLowerInvariant());
-        public static RoutingInstanceType ProviderDomainInfrastructureVrf = new RoutingInstanceType(3, nameof(ProviderDomainTenantFacingLayer3Vrf).ToLowerInvariant());
-
+        public static RoutingInstanceType Vrf = new RoutingInstanceType(2, nameof(Vrf).ToLowerInvariant());
+       
         protected RoutingInstanceType()
         {
         }
@@ -18,7 +20,7 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
         }
 
         public static IEnumerable<RoutingInstanceType> List() =>
-                new[] { Default, ProviderDomainTenantFacingLayer3Vrf, ProviderDomainInfrastructureVrf };
+                new[] { Default, Vrf };
 
         public static RoutingInstanceType FromName(string name)
         {
@@ -27,7 +29,7 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
 
             if (state == null)
             {
-                throw new OrderingDomainException($"Possible values for RoutingInstanceType: {String.Join(",", List().Select(s => s.Name))}");
+                throw new AttachmentDomainException($"Possible values for RoutingInstanceType: {String.Join(",", List().Select(s => s.Name))}");
             }
 
             return state;
@@ -39,7 +41,7 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
 
             if (state == null)
             {
-                throw new OrderingDomainException($"Possible values for RoutingInstanceType: {String.Join(",", List().Select(s => s.Name))}");
+                throw new AttachmentDomainException($"Possible values for RoutingInstanceType: {String.Join(",", List().Select(s => s.Name))}");
             }
 
             return state;

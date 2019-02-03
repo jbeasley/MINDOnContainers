@@ -10,6 +10,13 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
         public IReadOnlyCollection<DeviceRoleAttachmentRole> DeviceRoleAttachmentRoles => _deviceRoleAttachmentRoles;
         public bool IsProviderDomainRole { get; private set; }
 
-        public List<int> GetPortPoolIds() => _deviceRoleAttachmentRoles.Select(x => x.GetAttachmentRole().PortPoolId);
+        protected DeviceRole()
+        {
+            _deviceRoleAttachmentRoles = new List<DeviceRoleAttachmentRole>();
+        }
+
+        public List<int> GetPortPoolIds() => _deviceRoleAttachmentRoles
+                                                    .Select(x => x.AttachmentRole.PortPoolId)
+                                                    .ToList();
     }
 }

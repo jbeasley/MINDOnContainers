@@ -1,4 +1,5 @@
-﻿using MINDOnContainers.Services.Attachment.Domain.SeedWork;
+﻿using System;
+using MINDOnContainers.Services.Attachment.Domain.SeedWork;
 
 namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAggregate
 {
@@ -7,8 +8,14 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
         private readonly string _name;
         private readonly bool _trustReceivedCosAndDscp;
         private readonly int? _tenantId;
-        private readonly ContractBandwidth _contractBandwidth;
+        public ContractBandwidth ContractBandwidth { get; private set; }
 
-
+        public ContractBandwidthPool(ContractBandwidth contractBandwidth, bool trustReceivedCosAndDscp = false, int? tenantId = null)
+        {
+            _name = Guid.NewGuid().ToString("N");
+            _trustReceivedCosAndDscp = trustReceivedCosAndDscp;
+            ContractBandwidth = contractBandwidth;
+            _tenantId = tenantId;
+        }
     }
 }

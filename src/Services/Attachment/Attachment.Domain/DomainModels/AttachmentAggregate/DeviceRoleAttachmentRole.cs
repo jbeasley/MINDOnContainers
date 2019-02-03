@@ -1,13 +1,17 @@
-﻿using MINDOnContainers.Services.Attachment.Domain.SeedWork;
+﻿using System.Collections.Generic;
+using MINDOnContainers.Services.Attachment.Domain.SeedWork;
 
 namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAggregate
 {
     public class DeviceRoleAttachmentRole : ValueObject
     {
-        private readonly DeviceRole _deviceRole;
-        private readonly AttachmentRole _attachmentRole;
+        public DeviceRole DeviceRole { get; private set; }
+        public AttachmentRole AttachmentRole { get; private set; }
 
-        public DeviceRole GetDeviceRole() => _deviceRole;
-        public AttachmentRole GetAttachmentRole() => _attachmentRole;
+        protected override IEnumerable<object> GetAtomicValues()
+        {
+            yield return DeviceRole;
+            yield return AttachmentRole;
+        }
     }
 }

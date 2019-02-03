@@ -34,6 +34,9 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
+    <Reference Include="MediatR">
+      <HintPath>..\..\..\..\packages\MediatR.6.0.0\lib\net461\MediatR.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -67,6 +70,8 @@
     <Compile Include="DomainModels\AttachmentAggregate\RoutingInstanceType.cs" />
     <Compile Include="DomainModels\AttachmentAggregate\AttachmentBandwidth.cs" />
     <Compile Include="DomainModels\AttachmentAggregate\RouteDistinguisherRange.cs" />
+    <Compile Include="DomainModels\AttachmentAggregate\NetworkStatus.cs" />
+    <Compile Include="DomainModels\AttachmentAggregate\SingleAttachment.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -6,14 +6,14 @@ namespace MINDOnContainers.Services.Attachment.Domain.Exceptions
     /// </summary>
     public class AttachmentDomainException : Exception
     {
-        public OrderingDomainException()
+        public AttachmentDomainException()
         { }
 
-        public OrderingDomainException(string message)
+        public AttachmentDomainException(string message)
             : base(message)
         { }
 
-        public OrderingDomainException(string message, Exception innerException)
+        public AttachmentDomainException(string message, Exception innerException)
             : base(message, innerException)
         { }
     }

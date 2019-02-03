@@ -5,9 +5,9 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
 {
     public class Port : Entity
     {
-        private readonly PortStatus _status;
+        private PortStatus _status;
         private readonly int _portBandwidthGbps;
-        private readonly int? _tenantId;
+        private int? _tenantId;
         private readonly int _portPoolId;
 
         public Port(PortStatus status, int portBandwidthGbps, int portPoolId)

@@ -1,4 +1,7 @@
-﻿using MINDOnContainers.Services.Attachment.Domain.SeedWork;
+﻿using System;
+using System.Net;
+using System.Linq;
+using MINDOnContainers.Services.Attachment.Domain.SeedWork;
 using MINDOnContainers.Services.Attachment.Domain.Exceptions;
 
 namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAggregate
@@ -6,141 +9,114 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
     public class BgpPeer : Entity
     {
         private string _ipv4PeerAddress;
-        private int _peer2ByteAutonomousSystem;
+        private int _peer2ByteAutonomousSystemNumber;
         private int? _maximumRoutes;
         private bool _isBfdEnabled;
-        private bool _isMultiHop;
+        private bool _isMultiHopEnabled;
         private string _peerPassword;
-        public virtual RoutingInstance RoutingInstance { get; set; }
-        public virtual ICollection<VpnTenantCommunityIn> VpnTenantCommunitiesIn { get; set; }
-        public virtual ICollection<VpnTenantIpNetworkIn> VpnTenantIpNetworksIn { get; set; }
-        public virtual ICollection<VpnTenantCommunityOut> VpnTenantCommunitiesOut { get; set; }
-        public virtual ICollection<VpnTenantIpNetworkOut> VpnTenantIpNetworksOut { get; set; }
+        private readonly RoutingInstance _routingInstance;
 
-        /// <summary>
-        /// Validate the state of the bgp peer
-        /// </summary>
-        public virtual void Validate()
+        public BgpPeer(RoutingInstance routingInstance, string ipv4PeerAddress, int peer2ByteAutonomousSystemNumber, string peerPassword,
+            int maximumRoutes = 500, bool isBfdEnabled = true, bool isMultiHopEnabled = false)
         {
-            if (this.RoutingInstance == null) throw new IllegalStateException("A routing instance for the BGP peer is required.");
- 
-            if (!IPAddress.TryParse(this.Ipv4PeerAddress, out IPAddress peerIpv4Address))
-                throw new IllegalStateException("The peer address is not a valid IPv4 address");
+            _routingInstance = routingInstance ?? throw new ArgumentNullException(nameof(routingInstance));
 
-            if (this.Peer2ByteAutonomousSystem < 1 || this.Peer2ByteAutonomousSystem > 65535)
-                throw new IllegalStateException($"The 2 byte autonomous system number requested is not valid for BGP peer '{this.Ipv4PeerAddress}'. The number must be between " +
-                    "1 and 65535.");
+            SetIpv4PeerAddress(ipv4PeerAddress);
+            SetPeerPassword(peerPassword);
+            SetMaximumRoutes(maximumRoutes);
+            SetPeer2ByteAutonomousSystemNumber(peer2ByteAutonomousSystemNumber);
+            SetIsBfdEnabled(isBfdEnabled);
+            SetIsMultiHopEnabled(isMultiHopEnabled);          
+        }
 
-            // For non-multihop peers, the peer IP address must be reachable from at least one vif or attachment which
-            // belongs to the routing instance
-            if (!this.IsMultiHop)
+        public void SetIpv4PeerAddress(string ipv4PeerAddress)
+        {
+            if (string.IsNullOrEmpty(ipv4PeerAddress)) throw new ArgumentNullException(nameof(ipv4PeerAddress));
+
+            if (IPAddress.TryParse(ipv4PeerAddress, out IPAddress ipAddress))
             {
-                var vlan = this.RoutingInstance.Vifs?.SelectMany(
-                    x =>
-                    x.Vlans)
-                     .ToList()
-                     .FirstOrDefault(
-                        x =>
-                        {
-                            return IPNetwork.TryParse(x.IpAddress, x.SubnetMask, out IPNetwork network) && network.Contains(peerIpv4Address);
-                        });
-
-                var iface = this.RoutingInstance.Attachments?.SelectMany(
-                    x =>
-                    x.Interfaces)
-                     .ToList()
-                     .FirstOrDefault(
-                        x =>
-                        {
-                            return IPNetwork.TryParse(x.IpAddress, x.SubnetMask, out IPNetwork network) && network.Contains(peerIpv4Address);
-                        });
-
-                if (vlan == null && iface == null)
-                    throw new IllegalStateException($"The peer address '{this.Ipv4PeerAddress}' is not contained by any network which is " +
-                        $"directly reachable from routing instance '{this.RoutingInstance.Name}'. Check that the IP address for at least one vif or " +
-                        $"attachment belonging to the routing instance is in the same IPv4 network as the bgp peer.");
+                CheckPeerAddressReachability(ipAddress);
+                _ipv4PeerAddress = ipAddress.ToString();
+            }
+            else
+            {
+                throw new AttachmentDomainException($"'{ipv4PeerAddress}' is not valid.");
             }
         }
 
-        /// <summary>
-        /// Validate a bgp peer can be deleted
-        /// </summary>
-        public virtual void ValidateDelete()
+        public void SetPeer2ByteAutonomousSystemNumber(int peer2ByteAutonomousSystemNumber)
         {
-            var sb = new StringBuilder();
-            this.VpnTenantCommunitiesIn
-               .ToList()
-               .ForEach(x =>
-                    {
-                        sb.Append($"BGP Peer '{this.Ipv4PeerAddress}' cannot be deleted because community " +
-                        $"'{x.TenantCommunity.Name}' is applied to the inbound policy of ");
+            if (peer2ByteAutonomousSystemNumber < 1 || peer2ByteAutonomousSystemNumber > 65535)
+            {
+                throw new AttachmentDomainException("The peer 2 byte autonomous system number must be between 1 and 65535.");
+            }
 
-                        if (x.AttachmentSet != null)
-                        {
-                            sb.Append($"attachment set '{x.AttachmentSet.Name}'.").Append("\r\n");
-                        }
-                        else
-                        {
-                            sb.Append($"tenant domain device '{x.BgpPeer.RoutingInstance.Device.Name}'.").Append("\r\n");
-                        }
-                   }
-            );
+            this._peer2ByteAutonomousSystemNumber = peer2ByteAutonomousSystemNumber;
+        }
 
-            this.VpnTenantCommunitiesOut
-                .ToList()
-                .ForEach(x =>
-                    {
-                        sb.Append($"BGP Peer '{this.Ipv4PeerAddress}' cannot be deleted because community " +
-                        $"'{x.TenantCommunity.Name}' is applied to the outbound policy of ");
+        public void SetPeerPassword(string peerPassword)
+        {
+            if (string.IsNullOrEmpty(peerPassword)) throw new ArgumentNullException(nameof(peerPassword));
+            if (peerPassword.Length < 8 || peerPassword.Length > 20)
+            {
+                throw new AttachmentDomainException("The peer password length must be between 8 and 20 characters.");
+            }
 
-                        if (x.AttachmentSet != null)
-                        {
-                            sb.Append($"attachment set '{x.AttachmentSet.Name}'.").Append("\r\n");
-                        }
-                        else
-                        {
-                            sb.Append($"tenant domain device '{x.BgpPeer.RoutingInstance.Device.Name}'.").Append("\r\n");
-                        }
-                    }
-                );
+            _peerPassword = peerPassword;
+        }
 
-            this.VpnTenantIpNetworksIn
-                .ToList()
-                .ForEach(x =>
-                    {
-                        sb.Append($"BGP Peer '{this.Ipv4PeerAddress}' cannot be deleted because IP network " +
-                        $"'{x.TenantIpNetwork.CidrNameIncludingIpv4LessThanOrEqualToLength}' is applied to the inbound policy of ");
+        public void SetMaximumRoutes(int maximumRoutes)
+        {
+            if (maximumRoutes < 1 || maximumRoutes > 1000)
+            {
+                throw new AttachmentDomainException("Maximum routes must be between 1 and 1000.");
+            }
 
-                        if (x.AttachmentSet != null)
-                        {
-                            sb.Append($"attachment set '{x.AttachmentSet.Name}'.").Append("\r\n");
-                        }
-                        else
-                        {
-                            sb.Append($"tenant domain device '{x.BgpPeer.RoutingInstance.Device.Name}'.").Append("\r\n");
-                        }
-                    }
-                );
+            _maximumRoutes = maximumRoutes;
+        }
 
-            this.VpnTenantIpNetworksOut
-                .ToList()
-                .ForEach(x =>
-                    {
-                        sb.Append($"BGP Peer '{this.Ipv4PeerAddress}' cannot be deleted because IP network " +
-                        $"'{x.TenantIpNetwork.CidrNameIncludingIpv4LessThanOrEqualToLength}' is applied to the outbound policy of ");
+        public void SetIsBfdEnabled(bool isBfdEnabled = true) => _isBfdEnabled = isBfdEnabled;
 
-                        if (x.AttachmentSet != null)
-                        {
-                            sb.Append($"attachment set '{x.AttachmentSet.Name}'.").Append("\r\n");
-                        }
-                        else
-                        {
-                            sb.Append($"tenant domain device '{x.BgpPeer.RoutingInstance.Device.Name}'.").Append("\r\n");
-                        }
-                    }
-                );
+        public void SetIsMultiHopEnabled(bool isMultiHopEnabled = false) => _isMultiHopEnabled = isMultiHopEnabled;
 
-            if (sb.Length > 0) throw new IllegalDeleteAttemptException(sb.ToString());
+        /// <summary>
+        /// Validate the reachability of the peer address.
+        /// </summary>
+        private void CheckPeerAddressReachability(IPAddress ipv4PeerAddress) 
+        {
+            // For non-multihop peers, the peer IP address must be reachable from at least one vif or attachment which
+            // belongs to the routing instance
+            if (!this._isMultiHopEnabled)
+            {
+                var vlan = this._routingInstance.Vifs?.SelectMany(
+                    vif =>
+                    vif.Vlans)
+                     .ToList()
+                     .FirstOrDefault(
+                        v =>
+                        {
+                            var ipv4 = v.GetIpv4Address();
+                            return IPNetwork.TryParse(ipv4.Ipv4Address, ipv4.Ipv4SubnetMask, out IPNetwork network) && 
+                                network.Contains(ipv4PeerAddress);
+                        });
+
+                var @interface = this._routingInstance.Attachments?.SelectMany(
+                    attachment =>
+                    attachment.Interfaces)
+                     .ToList()
+                     .FirstOrDefault(
+                        i =>
+                        {
+                            var ipv4 = i.GetIpv4Address();
+                            return IPNetwork.TryParse(ipv4.Ipv4Address, ipv4.Ipv4SubnetMask, out IPNetwork network) && 
+                                network.Contains(ipv4PeerAddress);
+                        });
+
+                if (vlan == null && @interface == null)
+                    throw new AttachmentDomainException($"The peer address '{this._ipv4PeerAddress}' is not contained by any network which is " +
+                        $"directly reachable from routing instance '{this._routingInstance.Name}'. Check that the IP address for at least one vif or " +
+                        $"attachment belonging to the routing instance is in the same IPv4 network as the bgp peer.");
+            }
         }
     }
 }

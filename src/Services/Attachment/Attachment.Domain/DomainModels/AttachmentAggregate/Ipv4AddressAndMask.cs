@@ -1,4 +1,5 @@
-﻿using MINDOnContainers.Services.Attachment.Domain.SeedWork;
+﻿using System.Collections.Generic;
+using MINDOnContainers.Services.Attachment.Domain.SeedWork;
 
 namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAggregate
 {
@@ -18,12 +19,17 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
         /// </summary>
         /// <value>String denoting an IPv4 subnet mask</value>
         public string Ipv4SubnetMask { get; private set; }
-    }
 
-    public Ipv4AddressAndMask(string ipv4Address, string ipv4SubnetMask)
-    {
-        ipv4Address = ipv4Address;
-        ipv
-    }
+        public Ipv4AddressAndMask(string ipv4Address, string ipv4SubnetMask)
+        {
+            Ipv4Address = ipv4Address;
+            Ipv4SubnetMask = ipv4SubnetMask;
+        }
 
+        protected override IEnumerable<object> GetAtomicValues()
+        {
+            yield return Ipv4Address;
+            yield return Ipv4SubnetMask;
+        }
+    }
 }

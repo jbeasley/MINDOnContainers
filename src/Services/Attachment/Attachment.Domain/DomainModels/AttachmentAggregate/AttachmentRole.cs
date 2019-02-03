@@ -1,4 +1,6 @@
-﻿using MINDOnContainers.Services.Attachment.Domain.SeedWork;
+﻿using System;
+using System.Collections.Generic;
+using MINDOnContainers.Services.Attachment.Domain.SeedWork;
 
 namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAggregate
 {
@@ -12,13 +14,22 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
         public bool SupportedByBundle { get; private set; }
         public bool SupportedByMultiPort { get; private set; }
         public bool RequireRoutingInstance { get; private set; }
+        public RoutingInstanceType RoutingInstanceType { get; private set; }
         public int PortPoolId { get; private set; }
+        private readonly List<VifRole> _vifRoles;
+        public IReadOnlyCollection<VifRole> VifRoles => _vifRoles;
 
+        protected AttachmentRole()
+        {
+            _vifRoles = new List<VifRole>();
+        }
 
         public AttachmentRole(string name, bool isTenantFacing, bool layer3Role, bool taggedRole,
-            bool requireContractBandwidth, bool supportedByBundle, bool supportedByMultiPort, bool requireRoutingInstance, int portPoolId)
-        {
-            !string.IsNullOrEmpty(name) ? Name = name : throw new NullArgumentException("A name for the attachment role is required.");
+            bool requireContractBandwidth, bool supportedByBundle, bool supportedByMultiPort, bool requireRoutingInstance, 
+            RoutingInstanceType routingInstanceType, int portPoolId) : this()
+        { 
+            if (!string.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
+            Name = name;
             IsTenantFacing = isTenantFacing;
             IsTaggedRole = taggedRole;
             IsLayer3Role = layer3Role;
@@ -27,6 +38,10 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
             SupportedByMultiPort = supportedByMultiPort;
             RequireRoutingInstance = requireRoutingInstance;
             PortPoolId = portPoolId;
+            if (RequireRoutingInstance)
+            {
+                RoutingInstanceType = routingInstanceType ?? throw new ArgumentNullException(nameof(RoutingInstanceType));
+            }
         }
     }
 }

@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using MINDOnContainers.Services.Attachment.Domain.SeedWork;
+using MINDOnContainers.Services.Attachment.Domain.Exceptions;
 
 namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAggregate
 {
@@ -29,7 +32,7 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
 
             if (state == null)
             {
-                throw new OrderingDomainException($"Possible values for PortStatus: {String.Join(",", List().Select(s => s.Name))}");
+                throw new AttachmentDomainException($"Possible values for PortStatus: {String.Join(",", List().Select(s => s.Name))}");
             }
 
             return state;
@@ -41,7 +44,7 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
 
             if (state == null)
             {
-                throw new OrderingDomainException($"Possible values for PortStatus: {String.Join(",", List().Select(s => s.Name))}");
+                throw new AttachmentDomainException($"Possible values for PortStatus: {String.Join(",", List().Select(s => s.Name))}");
             }
 
             return state;

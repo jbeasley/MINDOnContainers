@@ -11,13 +11,12 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
         public string Name { get; private set; }
         private readonly bool _isLayer3;
         public int VlanTag { get; private set; }
-        private readonly int? tenantID;
+        private readonly int? _tenantId;
         private readonly bool _created;
         private readonly NetworkStatus _networkStatus;
-        private readonly RoutingInstance _routingInstance;
-        private readonly ContractBandwidthPool _contractBandwidthPool;
+        private RoutingInstance _routingInstance;
+        public ContractBandwidthPool ContractBandwidthPool { get; private set; }
         private readonly VifRole _vifRole;
-        private readonly VlanTagRange _vlanTagRange;
         private readonly Mtu _mtu;
         private readonly List<Vlan> _vlans;
         public IReadOnlyCollection<Vlan> Vlans => _vlans;
@@ -25,31 +24,58 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
         protected Vif()
         {
             _vlans = new List<Vlan>();
+            _created = true;
+            _networkStatus = NetworkStatus.Init;
         }
 
-        public Vif(bool isLayer3, VifRole role, VlanTagRange vlanTagRange, Mtu mtu,
-            RoutingInstance routingInstance, ContractBandwidthPool contractBandwidthPool, 
-            List<Ipv4AddressAndMask> ipv4Addresses,int? tenantId, int? vlanTag = null) : this()
+        public Vif(bool isLayer3, VifRole role, Mtu mtu, RoutingInstance routingInstance, ContractBandwidthPool contractBandwidthPool, 
+            List<Ipv4AddressAndMask> ipv4Addresses, int vlanTag, int? tenantId = null, bool trustReceivedCosAndDscp = false) : this()
         {
-            Name = Guid.NewGuid('N');
-            _isLayer3 = isLayer3;
+            Name = Guid.NewGuid().ToString("N");
 
-            if (vlanTag.HasValue)
+            // Must have a tenant specified for a tenant-facing vif
+            if (role.IsTenantFacing)
             {
-                if (vlanTag < 2 || vlanTag > 4094)
+                if (!this._tenantId.HasValue)
                 {
-                    throw new AttachmentDomainException("The vlan tag must be between 2 and 4094.");
+                    throw new ArgumentNullException(nameof(tenantId));
                 }
+
+                this._tenantId = tenantId;
             }
 
-            _vlanTag = vlanTag;
-            _mtu = mtu ?> throw new ArgumentNullException(nameof(mtu));
-            
+            _isLayer3 = isLayer3;
+            VlanTag = vlanTag;
+
+            _mtu = mtu ?? throw new ArgumentNullException(nameof(mtu));
+            _vifRole = role ?? throw new ArgumentNullException(nameof(role));
+            ContractBandwidthPool = contractBandwidthPool ?? throw new ArgumentNullException(nameof(contractBandwidthPool));
+            this. _routingInstance = routingInstance ?? throw new ArgumentNullException(nameof(routingInstance));
         }
 
-        protected internal virtual void CreateVlans(List<Ipv4AddressAndMask> ipv4Addresses)
-        {  
-            _vlans.Add(new Vlan());
+        /// <summary>
+        /// Add a vlan.
+        /// </summary>
+        /// <param name="vlan">Vlan.</param>
+        public void AddVlan(Vlan vlan)
+        {
+            _vlans.Add(vlan);
+        }
+
+        /// <summary>
+        /// Checks the type of the routing instance to ensure compatiibility with the role of the vif
+        /// </summary>
+        /// <param name="routingInstanceType">Routing instance type.</param>
+        protected void CheckRoutingInstanceType(RoutingInstanceType routingInstanceType)
+        {
+            if (this._vifRole.IsTenantFacing)
+            {
+                if (routingInstanceType.Name != RoutingInstanceType.Vrf.Name)
+                {
+                    throw new AttachmentDomainException($"Routing instance type '{routingInstanceType.Name}' cannot be used to " +
+                    	"create a routing instance for a tenant-facing vif.");
+                }
+            }
         }
     }
 }

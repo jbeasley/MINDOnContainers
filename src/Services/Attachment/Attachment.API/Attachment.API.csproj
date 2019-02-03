@@ -10,4 +10,32 @@
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="Application\Commands\ProviderDomainAttachmentRequest.cs" />
+    <Compile Remove="Application\Commands\ProviderDomainAttachmentUpdate.cs" />
+    <Compile Remove="Application\Commands\ProviderDomainVifRequest.cs" />
+    <Compile Remove="Application\Commands\ProviderDomainVifUpdate.cs" />
+    <Compile Remove="Application\Queries\ViewModels\ProviderDomainAttachment.cs" />
+    <Compile Remove="Application\Queries\ViewModels\ProviderDomainVif.cs" />
+    <Compile Remove="Controllers\ProviderDomainAttachmentApi.cs" />
+    <Compile Remove="Controllers\ProviderDomainVifApi.cs" />
+    <Compile Remove="Infrastructure\Attributes\ValidateProviderDomainAttachmentExistsAttribute.cs" />
+    <Compile Remove="Infrastructure\Attributes\ValidateProviderDomainVifExistsAttribute.cs" />
+    <Compile Remove="Infrastructure\Attributes\ValidateTenantExistsAttribute.cs" />
+    <Compile Remove="Infrastructure\Filters\BasePathFilter.cs" />
+    <Compile Remove="Infrastructure\Filters\GeneratePathParamsValidationFilter.cs" />
+    <Compile Remove="Infrastructure\ActionResults\BadArgumentsResult.cs" />
+    <Compile Remove="Infrastructure\ActionResults\DatabaseUpdateFailedResult.cs" />
+    <Compile Remove="Infrastructure\ActionResults\PreconditionFailedResult.cs" />
+    <Compile Remove="Infrastructure\ActionResults\ResourceNotFoundResult.cs" />
+    <Compile Remove="Infrastructure\ActionResults\ValidationFailedResult.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Application\Commands\" />
+    <Folder Include="Application\Queries\ViewModels\" />
+    <Folder Include="Controllers\" />
+    <Folder Include="Infrastructure\Attributes\" />
+    <Folder Include="Infrastructure\Filters\" />
+    <Folder Include="Infrastructure\ActionResults\" />
+  </ItemGroup>
 </Project>
