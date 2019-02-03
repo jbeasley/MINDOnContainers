@@ -77,7 +77,7 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
                 }
                 else
                 {
-                    this._routingInstance = new RoutingInstance(device: this._device, type: role.RoutingInstanceType, tenantId: this._tenantId);
+                    CreateRoutingInstance(role.RoutingInstanceType, this._tenantId);
                 }
             }
         }
@@ -104,6 +104,12 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
             RoutingInstance routingInstance, ContractBandwidthPool contractBandwidthPool, ContractBandwidth contractBandwidth,
             List<Ipv4AddressAndMask> ipv4Addresses, bool trustReceivedCosAndDscp = false, int? tenantId = null, int? vlanTag = null)
         {
+            // The supplied vif role must be compatible with the attachment
+            if (!this._attachmentRole.VifRoles.Contains(role))
+            {
+                throw new AttachmentDomainException($"Vif role '{role.Name}' is not valid for attachment '{this.Name}' ");
+            }
+
             if (!this._isTagged)
             {
                 throw new AttachmentDomainException($"A Vif cannot be created for attachment '{this.Name}' because the attachment is not enabled for tagging. ");
@@ -154,27 +160,22 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
                 contractBandwidthPool = new ContractBandwidthPool(contractBandwidth, trustReceivedCosAndDscp, tenantId);
             }
 
-            if (routingInstance != null)
+            if (role.RequireRoutingInstance)
             {
-                // Validate the routing instance belongs to the device for this attachment
-                if (!this._device.RoutingInstances.Contains(routingInstance))
+                if (routingInstance != null)
                 {
-                    throw new AttachmentDomainException($"The supplied routing instance does not exist or does not belong to attachment '{this.Name}'.");
+                    CheckRoutingInstanceType(routingInstance.RoutingInstanceType);
                 }
-            }
-            else
-            {
-                routingInstance = new RoutingInstance(device: this._device, type: role.RoutingInstanceType, tenantId: tenantId);
-            }
-
-            // The supplied vif role must be compatible with the attachment
-            if (!this._attachmentRole.VifRoles.Contains(role))
-            {
-                throw new AttachmentDomainException($"Vif role '{role.Name}' is not valid for attachment '{this.Name}' ");
+                else
+                {
+                    CreateRoutingInstance(role.RoutingInstanceType, tenantId);
+                }
             }
 
             var vif = new Vif(isLayer3, role, mtu, routingInstance, contractBandwidthPool, ipv4Addresses, 
             vlanTag.Value, tenantId, trustReceivedCosAndDscp);
+
+            CreateVlans(vif, ipv4Addresses);
 
             this._vifs.Add(vif);
         }
@@ -222,7 +223,7 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
             this._interfaces.Add(@interface);
         }
 
-        protected internal virtual void CreateVlans(Vif vif, List<Ipv4AddressAndMask> ipv4Addresses)
+        protected internal virtual List<Vlan> CreateVlans(Vif vif, List<Ipv4AddressAndMask> ipv4Addresses)
         {
             if (this._isLayer3)
             {
@@ -233,6 +234,7 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
                 }
             }
 
+            var vlans = new List<Vlan>();
             foreach (var @interface in this._interfaces) 
             {
                 var vlan = new Vlan();
@@ -246,7 +248,11 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
 
                 @interface.AddVlan(vlan);
                 vif.AddVlan(vlan);
+
+                vlans.Add(vlan);
             }
+
+            return vlans;
         }
 
         /// <summary>
@@ -280,6 +286,14 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
                     	"cannot be used to create a routing instance for a tenant-facing attachment.");
                 }
             }
+        }
+
+        private RoutingInstance CreateRoutingInstance(RoutingInstanceType routingInstanceType, int? tenantId = null)
+        {
+            var routingInstance = new RoutingInstance(device: this._device, type: routingInstanceType, tenantId: tenantId);
+            this._device.AddRoutingInstance(routingInstance);
+
+            return routingInstance;
         }
 
         private int AssignVlanTag(VlanTagRange range)
