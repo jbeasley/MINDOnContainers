@@ -14,7 +14,7 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
         {
             _name = Guid.NewGuid().ToString("N");
             _trustReceivedCosAndDscp = trustReceivedCosAndDscp;
-            ContractBandwidth = contractBandwidth;
+            ContractBandwidth = contractBandwidth ?? throw new ArgumentNullException(nameof(contractBandwidth));
             _tenantId = tenantId;
         }
     }

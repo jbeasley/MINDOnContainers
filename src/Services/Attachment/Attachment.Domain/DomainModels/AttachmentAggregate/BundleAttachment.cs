@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using MINDOnContainers.Services.Attachment.Domain.SeedWork;
+using MINDOnContainers.Services.Attachment.Domain.Events;
 using MINDOnContainers.Services.Attachment.Domain.Exceptions;
 
 namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAggregate
@@ -11,10 +10,11 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
         private int? _bundleMinLinks;
         private int? _bundleMaxLinks;
 
-        public BundleAttachment(string description, string notes, AttachmentBandwidth attachmentBandwidth, RoutingInstance routingInstance,
-        AttachmentRole role, Mtu mtu, Device device, List<Ipv4AddressAndMask> ipv4Addresses, int? tenantId = null, int? bundleMinLinks = null, 
+        public BundleAttachment(string description, string notes, AttachmentBandwidth attachmentBandwidth,
+            AttachmentRole role, Mtu mtu, Device device, RoutingInstance routingInstance = null, 
+            List<Ipv4AddressAndMask> ipv4Addresses = null, int? tenantId = null, int? bundleMinLinks = null, 
             int? bundleMaxLinks = null) 
-            : base(description, notes, attachmentBandwidth, routingInstance, role, mtu, device, ipv4Addresses, tenantId)
+            : base(description, notes, attachmentBandwidth, role, mtu, device, routingInstance, ipv4Addresses, tenantId)
         { 
 
             if (!attachmentBandwidth.MustBeBundleOrMultiPort && !attachmentBandwidth.SupportedByBundle)
@@ -46,7 +46,11 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
                 this._bundleMaxLinks = attachmentBandwidth.GetNumberOfPortsRequiredForBundle();
             }
 
-            base.CreateInterfaces(ipv4Addresses, ports); 
+            // Create some interfaces and assign IP addresses if the attachment is enabled for layer 3
+            base.CreateInterfaces(ipv4Addresses, ports);
+
+            // Raise a domain event to notify listeners that a new bundle attachment has been initialised
+            this.AddDomainEvent(new AttachmentInitialisedDomainEvent(this));
         }             
 
         public void SetBundleLinks(int bundleMinLinks, int bundleMaxLinks)

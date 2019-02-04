@@ -6,7 +6,7 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
     /// <summary>
     /// Model for IPv4 address and subnet mask
     /// </summary>
-    public class Ipv4AddressAndMask : ValueObject
+    public class Ipv4AddressAndMask : Entity
     {
         /// <summary>
         /// IPv4 address
@@ -24,12 +24,6 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
         {
             Ipv4Address = ipv4Address;
             Ipv4SubnetMask = ipv4SubnetMask;
-        }
-
-        protected override IEnumerable<object> GetAtomicValues()
-        {
-            yield return Ipv4Address;
-            yield return Ipv4SubnetMask;
         }
     }
 }

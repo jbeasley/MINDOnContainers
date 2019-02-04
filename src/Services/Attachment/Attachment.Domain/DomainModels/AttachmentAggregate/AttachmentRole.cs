@@ -14,6 +14,7 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
         public bool SupportedByBundle { get; private set; }
         public bool SupportedByMultiPort { get; private set; }
         public bool RequireRoutingInstance { get; private set; }
+        private readonly int _routingInstanceTypeId;
         public RoutingInstanceType RoutingInstanceType { get; private set; }
         public int PortPoolId { get; private set; }
         private readonly List<VifRole> _vifRoles;

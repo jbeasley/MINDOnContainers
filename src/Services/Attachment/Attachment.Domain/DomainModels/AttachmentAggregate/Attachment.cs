@@ -14,34 +14,44 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
         private readonly bool _isTagged;
         private readonly bool _isLayer3;
         private readonly int? _tenantId;
-        private readonly AttachmentBandwidth _attachmentBandwidth;
+        public  AttachmentBandwidth AttachmentBandwidth { get; private set; }
+        private readonly int _deviceId;
         private readonly Device _device;
-        private RoutingInstance _routingInstance;
-        private readonly List<ContractBandwidthPool> _contractBandwidthPools;
+        private readonly int _routingInstanceId;
+        public RoutingInstance RoutingInstance { get; private set; }
+        public ContractBandwidthPool ContractBandwidthPool { get; private set; }
+        private readonly int _attachmentRoleId;
         private readonly AttachmentRole _attachmentRole;
-        private Mtu _mtu;
+        private readonly int _mtuId;
+        public Mtu Mtu { get; private set; }
         private readonly List<Interface> _interfaces;
         public IReadOnlyCollection<Interface> Interfaces => _interfaces;
         private readonly List<Vif> _vifs;
+        public IReadOnlyCollection<Vif> Vifs => _vifs;
         private bool _created;
-        private readonly NetworkStatus _networkStatus;
+        private readonly int _networkStatusId;
 
         protected Attachment()
         {
-            _contractBandwidthPools = new List<ContractBandwidthPool>();
             _interfaces = new List<Interface>();
             _vifs = new List<Vif>();
             _created = true;
-            _networkStatus = NetworkStatus.Init;
+            _networkStatusId = NetworkStatus.Init.Id;
         }
 
-        public Attachment(string description, string notes, AttachmentBandwidth attachmentBandwidth, RoutingInstance routingInstance, 
-        AttachmentRole role, Mtu mtu, Device device, List<Ipv4AddressAndMask> ipv4Addresses, int? tenantId = null) : this()
+        protected Attachment(string description, string notes, AttachmentBandwidth attachmentBandwidth, 
+            AttachmentRole role, Mtu mtu, Device device, RoutingInstance routingInstance = null, 
+            List<Ipv4AddressAndMask> ipv4Addresses = null, int? tenantId = null) : this()
         {
+            this._device = device ?? throw new ArgumentNullException(nameof(device));
+            this._deviceId = device.Id;
+            this._attachmentRole = role ?? throw new ArgumentNullException(nameof(role));
+            this._attachmentRoleId = role.Id;
+
             // The supplied attachment role must be compatible with the supplied device
             if (!device.DeviceRole.DeviceRoleAttachmentRoles
                                   .Select(d => d.AttachmentRole)
-                                  .Contains(this._attachmentRole))
+                                  .Contains(role))
             {
                 throw new AttachmentDomainException($"Attachment role '{this._attachmentRole.Name}' is not valid for device '{device.Name}' ");
             }
@@ -58,34 +68,39 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
             }
 
             Name = Guid.NewGuid().ToString("N");
-            this._device = device ?? throw new ArgumentNullException(nameof(device));
-            this._attachmentRole = role ?? throw new ArgumentNullException(nameof(role));
-            this._attachmentBandwidth = attachmentBandwidth ?? throw new ArgumentNullException(nameof(attachmentBandwidth));
+            this.AttachmentBandwidth = attachmentBandwidth ?? throw new ArgumentNullException(nameof(attachmentBandwidth));
             this._description = description ?? throw new ArgumentNullException(nameof(description));
             this._notes = notes;
             this._isLayer3 = role.IsLayer3Role;
             this._isTagged = role.IsTaggedRole;
             this._created = true;
-            this._mtu = mtu ?? throw new ArgumentNullException(nameof(mtu));
+            this.Mtu = mtu ?? throw new ArgumentNullException(nameof(mtu));
+            this._mtuId = mtu.Id;
 
             if (role.RequireRoutingInstance)
             {
                 if (routingInstance != null)
                 {
+                    // Check the supplied routing instance is of a valid type
                     CheckRoutingInstanceType(routingInstance.RoutingInstanceType);
-                    this._routingInstance = routingInstance;
+
+                    // It must be good!
+                    this.RoutingInstance = routingInstance;
+                    this._routingInstanceId = routingInstance.Id;
                 }
                 else
                 {
-                    CreateRoutingInstance(role.RoutingInstanceType, this._tenantId);
+                    // Create a new routing instance
+                    this.RoutingInstance = CreateRoutingInstance(role.RoutingInstanceType, this._tenantId);
                 }
             }
         }
 
-        public void SetDescription(string description) => _description = description;
-        public void SetNotes(string notes) => _notes = notes;
-        public void ClearCreated() => _created = false;
-        public void SetMtu(Mtu mtu) => _mtu = mtu;
+        public void SetDescription(string description) => this._description = description;
+        public void SetNotes(string notes) => this._notes = notes;
+        public void ClearCreated() => this._created = false;
+        public void SetMtu(Mtu mtu) => this.Mtu = mtu;
+        public List<ContractBandwidthPool> GetContractBandwidthPools() => this.Vifs.Select(vif => vif.ContractBandwidthPool).ToList();
 
         /// <summary>
         /// Adds a vif to the attachment.
@@ -123,7 +138,7 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
                 }
 
                 // Validate that the supplied vlan tag is unique
-                if (this._vifs.ToList().Select(v => v.VlanTag).Contains(vlanTag.Value))
+                if (this._vifs.Select(v => v.VlanTag).Contains(vlanTag.Value))
                 {
                     throw new AttachmentDomainException($"Vlan tag '{vlanTag}' is already used.");
                 }
@@ -133,6 +148,8 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
                 vlanTag = AssignVlanTag(vlanTagRange);
             }
 
+            var vlans = CreateVlans(ipv4Addresses);
+
             if (contractBandwidthPool == null && contractBandwidth == null)
             {
                 throw new AttachmentDomainException("Either a contract bandwidth or an existing contract bandwidth pool is needed to create a vif.");
@@ -141,9 +158,10 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
             if (contractBandwidthPool != null)
             {
                 // Validate the contract bandwidth pool belongs to this attachment
-                if (!this._contractBandwidthPools.Contains(contractBandwidthPool))
+                if (!this.GetContractBandwidthPools().Contains(contractBandwidthPool))
                 {
-                    throw new AttachmentDomainException($"The supplied contract bandwidth pool does not exist or does not belong to attachment '{this.Name}'.");
+                    throw new AttachmentDomainException($"The supplied contract bandwidth pool does not exist or does not belong to " +
+                    	"attachment '{this.Name}'.");
                 }
             }
 
@@ -151,10 +169,11 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
             {
                 // Validate there is sufficient attachment bandwidth available
                 var usedBandwidthMbps = this._vifs.Select(v => v.ContractBandwidthPool.ContractBandwidth.BandwidthMbps).Sum();
-                var availableBandwidthMbps = this._attachmentBandwidth.BandwidthGbps * 1000 - usedBandwidthMbps;
+                var availableBandwidthMbps = this.AttachmentBandwidth.BandwidthGbps * 1000 - usedBandwidthMbps;
                 if (availableBandwidthMbps < contractBandwidth.BandwidthMbps)
                 {
-                    throw new AttachmentDomainException($"Insufficient bandwidth remaining. Attachment '{this.Name}' has '{availableBandwidthMbps}' Mbps available.");
+                    throw new AttachmentDomainException($"Insufficient bandwidth remaining. Attachment '{this.Name}' has '{availableBandwidthMbps}' " +
+                    	"Mbps available.");
                 }
 
                 contractBandwidthPool = new ContractBandwidthPool(contractBandwidth, trustReceivedCosAndDscp, tenantId);
@@ -172,11 +191,9 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
                 }
             }
 
-            var vif = new Vif(isLayer3, role, mtu, routingInstance, contractBandwidthPool, ipv4Addresses, 
-            vlanTag.Value, tenantId, trustReceivedCosAndDscp);
-
-            CreateVlans(vif, ipv4Addresses);
-
+            var vif = new Vif(isLayer3, role, mtu, vlans, vlanTag.Value, routingInstance, 
+                contractBandwidthPool, tenantId, trustReceivedCosAndDscp);
+                
             this._vifs.Add(vif);
         }
 
@@ -190,10 +207,17 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
             this._vifs.Remove(vif);
         }
 
+        /// <summary>
+        /// Assign ports from the device to the attachment.
+        /// </summary>
+        /// <returns>The ports.</returns>
+        /// <param name="numPortsRequired">Number ports required.</param>
+        /// <param name="portBandwidthRequiredGbps">Port bandwidth required gbps.</param>
         protected internal virtual List<Port> AssignPorts(int numPortsRequired, int portBandwidthRequiredGbps)
         {
             if (numPortsRequired <= 0) throw new AttachmentDomainException("Number of ports required for the attachment must be greater than 0.");
 
+            // Get free ports from the device which belong to the required port pool and are of the required port bandwidth
             List<Port> ports = this._device.Ports.Where(
                                    port =>
                                    port.GetPortStatus() == PortStatus.Free &&
@@ -205,16 +229,24 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
             // Check we have the required number of ports - the 'take' method will only return the number of ports found which may be 
             // less than the required number
             if (ports.Count() != numPortsRequired) throw new AttachmentDomainException("Could not find a sufficient number of free ports " +
-                $"matching the requirements. {numPortsRequired} ports of {portBandwidthRequiredGbps} Gbps are required but {ports.Count()} free ports were found.");
+                $"matching the requirements. {numPortsRequired} ports of {portBandwidthRequiredGbps} Gbps are required but {ports.Count()} free " +
+                	"ports were found.");
 
+            // Assign the ports
             ports.ForEach(port => port.Assign(this._tenantId));
 
             return ports;
         }
 
+        /// <summary>
+        /// Create interfaces for the attachment.
+        /// </summary>
+        /// <param name="ipv4Addresses">Ipv4 addresses.</param>
+        /// <param name="ports">Ports.</param>
         protected internal virtual void CreateInterfaces(List<Ipv4AddressAndMask> ipv4Addresses, List<Port> ports)
         {
             var @interface = new Interface(ports: ports);
+
             if (_isLayer3)
             {
                 @interface.SetIpv4Address(ipv4Addresses.FirstOrDefault());
@@ -223,13 +255,18 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
             this._interfaces.Add(@interface);
         }
 
-        protected internal virtual List<Vlan> CreateVlans(Vif vif, List<Ipv4AddressAndMask> ipv4Addresses)
+        /// <summary>
+        /// Create vlans for a vif.
+        /// </summary>
+        /// <returns>The vlans.</returns>
+        /// <param name="ipv4Addresses">Ipv4 addresses.</param>
+        protected internal virtual List<Vlan> CreateVlans(List<Ipv4AddressAndMask> ipv4Addresses)
         {
             if (this._isLayer3)
             {
                 if (ipv4Addresses.Count != this._interfaces.Count)
                 {
-                    throw new AttachmentDomainException($"Insufficient IPv4 addresses provided to create vlans for vif '{vif.Name}'. " +
+                    throw new AttachmentDomainException($"Insufficient IPv4 addresses provided to create vlans for a new vif for attachment '{this.Name}'. " +
                     	$"{ipv4Addresses.Count} were supplied but {this._interfaces.Count} are required.");
                 }
             }
@@ -247,8 +284,6 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
                 }
 
                 @interface.AddVlan(vlan);
-                vif.AddVlan(vlan);
-
                 vlans.Add(vlan);
             }
 
@@ -288,6 +323,12 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
             }
         }
 
+        /// <summary>
+        /// Create a routing instance for an attachment or a vif.
+        /// </summary>
+        /// <returns>The routing instance.</returns>
+        /// <param name="routingInstanceType">Routing instance type.</param>
+        /// <param name="tenantId">Tenant identifier.</param>
         private RoutingInstance CreateRoutingInstance(RoutingInstanceType routingInstanceType, int? tenantId = null)
         {
             var routingInstance = new RoutingInstance(device: this._device, type: routingInstanceType, tenantId: tenantId);
@@ -296,6 +337,11 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
             return routingInstance;
         }
 
+        /// <summary>
+        /// Assigns a vlan tag to a vif.
+        /// </summary>
+        /// <returns>The vlan tag.</returns>
+        /// <param name="range">Vlan tag range from which to assign the vlan</param>
         private int AssignVlanTag(VlanTagRange range)
         {
             int? vlanTag = Enumerable.Range(range.StartValue, range.EndValue - range.StartValue)

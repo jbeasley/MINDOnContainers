@@ -12,6 +12,7 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
         public IReadOnlyCollection<Port> Ports => _ports;
         private readonly List<RoutingInstance> _routingInstances;
         public IReadOnlyCollection<RoutingInstance> RoutingInstances => _routingInstances;
+        private readonly int _deviceRoleId;
         public DeviceRole DeviceRole { get; private set; }
 
         protected Device()
@@ -25,6 +26,7 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
             if (string.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
             Name = name;
             DeviceRole = deviceRole ?? throw new ArgumentNullException(nameof(deviceRole));
+            _deviceRoleId = deviceRole.Id;
 
             ports.ForEach(port => AddPort(port));
             routingInstances.ForEach(AddRoutingInstance);

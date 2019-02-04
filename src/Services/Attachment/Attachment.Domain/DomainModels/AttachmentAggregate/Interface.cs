@@ -8,6 +8,7 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
 {
     public class Interface : Entity
     {
+        private readonly int ipv4AddressAndMaskId;
         private Ipv4AddressAndMask _ipv4AddressAndMask;
         private readonly List<Port> _ports;
         public IReadOnlyCollection<Port> Ports => _ports;
@@ -22,7 +23,7 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
 
         public Interface(List<Port> ports, Ipv4AddressAndMask ipv4Address = null) : this()
         {
-            SetIpv4Address(ipv4Address);
+            if (ipv4Address != null) SetIpv4Address(ipv4Address);
             _ports.AddRange(ports.Except(_ports));           
         }
 

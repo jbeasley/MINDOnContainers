@@ -14,12 +14,14 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
         private bool _isBfdEnabled;
         private bool _isMultiHopEnabled;
         private string _peerPassword;
+        private readonly int _routingInstanceId;
         private readonly RoutingInstance _routingInstance;
 
         public BgpPeer(RoutingInstance routingInstance, string ipv4PeerAddress, int peer2ByteAutonomousSystemNumber, string peerPassword,
             int maximumRoutes = 500, bool isBfdEnabled = true, bool isMultiHopEnabled = false)
         {
             _routingInstance = routingInstance ?? throw new ArgumentNullException(nameof(routingInstance));
+            _routingInstanceId = routingInstance.Id;
 
             SetIpv4PeerAddress(ipv4PeerAddress);
             SetPeerPassword(peerPassword);

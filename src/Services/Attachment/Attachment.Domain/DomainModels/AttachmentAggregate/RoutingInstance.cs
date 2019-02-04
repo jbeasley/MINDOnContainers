@@ -13,7 +13,9 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
         public int? AssignedNumberSubField { get; private set; }
         private readonly int? _tenantId;
         private readonly RouteDistinguisherRange _routeDistinguisherRange;
+        private readonly int _routingInstanceTypeId;
         public RoutingInstanceType RoutingInstanceType { get; private set; }
+        private readonly int _deviceId;
         private readonly Device _device;
         private readonly List<Attachment> _attachments;
         public IReadOnlyCollection<Attachment> Attachments => _attachments;
@@ -31,23 +33,26 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
         public RoutingInstance(Device device, RoutingInstanceType type, string name = "", int? tenantId = null, 
         RouteDistinguisherRange range = null, int? administratorSubField = null, int? assignedNumberSubField = null) : this()
         {
+            this._device = device ?? throw new ArgumentNullException(nameof(device));
+            this._deviceId = device.Id;
+
             if (!string.IsNullOrEmpty(name))
             {
                 if (device.RoutingInstances.Any(routingInstance => routingInstance.Name == name))
                 {
-                    throw new AttachmentDomainException($"Routing instance name '{name}' is already used.");
+                    throw new AttachmentDomainException($"Routing instance name '{name}' is already used. Please choose another.");
                 }
 
-                Name = name;
+                this.Name = name;
             }
             else
             {
-                Name = Guid.NewGuid().ToString("N");
+                this.Name = Guid.NewGuid().ToString("N");
             }
 
-            _device = device ?? throw new ArgumentNullException(nameof(device));
-            RoutingInstanceType = type ?? throw new ArgumentNullException(nameof(type));
-            _routeDistinguisherRange = range;
+            this.RoutingInstanceType = type ?? throw new ArgumentNullException(nameof(type));
+            this._routingInstanceTypeId = type.Id;
+            this._routeDistinguisherRange = range;
 
             // Must assign a route distinguisher to this routing instance if the routing instance is for a VRF
             // Note the Default routing instance must not be assigned a route distinguisher
@@ -67,7 +72,8 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
                             routingInstance.AssignedNumberSubField == assignedNumberSubField.Value &&
                             routingInstance.AdministratorSubField == administratorSubField.Value))
                 {
-                    throw new AttachmentDomainException($"A routing instance with route distinguisher '{administratorSubField}:{assignedNumberSubField}' already exists.");
+                    throw new AttachmentDomainException($"A routing instance with route distinguisher " +
+                    	"'{administratorSubField}:{assignedNumberSubField}' already exists.");
                 }
 
                 AdministratorSubField = administratorSubField;
@@ -89,8 +95,8 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
                 int? newAssignedNumberSubField = Enumerable.Range(range.AssignedNumberSubFieldStartValue, range.GetCount())
                                .Except(usedAssignedNumbers).FirstOrDefault();
 
-                AssignedNumberSubField = newAssignedNumberSubField ?? throw new AttachmentDomainException("Failed to allocate a free route distinguisher. "
-                        + "Please contact your system administrator, or try another range.");
+                AssignedNumberSubField = newAssignedNumberSubField ?? throw new AttachmentDomainException("Failed to allocate a free route distinguisher. " +
+                        "Please contact your system administrator, or try another range.");
 
                 AdministratorSubField = range.AdministratorSubField;
             }
