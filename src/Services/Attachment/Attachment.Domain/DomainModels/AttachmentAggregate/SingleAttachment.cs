@@ -10,7 +10,7 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
             List<Ipv4AddressAndMask> ipv4Addresses = null, int? tenantId = null) 
             : base(description, notes, attachmentBandwidth, role, mtu, device, routingInstance, ipv4Addresses, tenantId)
         {
-            // Assign some ports to the attachment
+            // Assign a port to the attachment. For a single attachment we only need one.
             var ports = base.AssignPorts(1, attachmentBandwidth.BandwidthGbps);
 
             // Create some interfaces and assign IP addresses if the attachment is enabled for layer 3

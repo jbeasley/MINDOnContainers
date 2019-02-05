@@ -4,7 +4,7 @@ using MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAggrega
 
 namespace MINDOnContainers.Services.Attachment.Infrastructure.EntityConfigurations
 {
-    class deviceRoleRoleEntityTypeConfiguration : IEntityTypeConfiguration<DeviceRole>
+    class DeviceRoleEntityTypeConfiguration : IEntityTypeConfiguration<DeviceRole>
     {
         public void Configure(EntityTypeBuilder<DeviceRole> deviceRoleConfiguration)
         {

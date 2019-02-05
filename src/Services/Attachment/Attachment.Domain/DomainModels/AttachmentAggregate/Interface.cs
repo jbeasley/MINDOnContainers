@@ -9,7 +9,7 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
     public class Interface : Entity
     {
         private readonly int ipv4AddressAndMaskId;
-        private Ipv4AddressAndMask _ipv4AddressAndMask;
+        public Ipv4AddressAndMask Ipv4AddressAndMask { get; private set; }
         private readonly List<Port> _ports;
         public IReadOnlyCollection<Port> Ports => _ports;
         private readonly List<Vlan> _vlans;
@@ -31,19 +31,13 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
         {
             if (IPNetwork.TryParse(ipv4Address.Ipv4Address, ipv4Address.Ipv4SubnetMask, out IPNetwork network))
             {
-                _ipv4AddressAndMask = new Ipv4AddressAndMask(network.FirstUsable.ToString(), network.Netmask.ToString());
+                this.Ipv4AddressAndMask = new Ipv4AddressAndMask(network.FirstUsable.ToString(), network.Netmask.ToString());
             }
             else
             {
                 throw new AttachmentDomainException($"Invalid IPv4 address/mask - '{ipv4Address.Ipv4Address}, {ipv4Address.Ipv4SubnetMask}'");
             }
         }
-
-        /// <summary>
-        /// Return IPv4 address details.
-        /// </summary>
-        /// <returns>The ipv4 address.</returns>
-        public Ipv4AddressAndMask GetIpv4Address() => _ipv4AddressAndMask;
 
         /// <summary>
         /// Add a vlan.

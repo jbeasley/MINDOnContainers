@@ -6,7 +6,6 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
 {
     public class BundleAttachment : Attachment
     {
-        private bool _isBundle;
         private int? _bundleMinLinks;
         private int? _bundleMaxLinks;
 
@@ -17,12 +16,12 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
             : base(description, notes, attachmentBandwidth, role, mtu, device, routingInstance, ipv4Addresses, tenantId)
         { 
 
+            // Check the requested bandwidth for the attachment is supported by a bundle
             if (!attachmentBandwidth.MustBeBundleOrMultiPort && !attachmentBandwidth.SupportedByBundle)
             {
-                throw new AttachmentDomainException($"The requested bandwidth, '{attachmentBandwidth.BandwidthGbps} Gbps', is not supported by a bundle attachment.");
+                throw new AttachmentDomainException($"The requested bandwidth, '{attachmentBandwidth.BandwidthGbps} Gbps', " +
+                	"is not supported by a bundle attachment.");
             }
-
-            _isBundle = true;
 
             // Assign some ports to the bundle attachment
             var ports = base.AssignPorts(attachmentBandwidth.GetNumberOfPortsRequiredForBundle().Value, attachmentBandwidth.BundleOrMultiPortMemberBandwidthGbps.Value);
@@ -53,6 +52,11 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
             this.AddDomainEvent(new AttachmentInitialisedDomainEvent(this));
         }             
 
+        /// <summary>
+        /// Sets the bundle min and max links parameters.
+        /// </summary>
+        /// <param name="bundleMinLinks">Bundle minimum links.</param>
+        /// <param name="bundleMaxLinks">Bundle max links.</param>
         public void SetBundleLinks(int bundleMinLinks, int bundleMaxLinks)
         {
             var countOfPorts = base.GetPorts().Count;

@@ -24,6 +24,7 @@ namespace MINDOnContainers.Services.Attachment.Infrastructure
         public DbSet<BundleAttachment> BundleAttachments { get; set; }
         public DbSet<VifRole> VifRoles { get; set; }
         public DbSet<Vif> Vifs { get; set; }
+        public DbSet<Ipv4AddressAndMask> Ipv4AddressesAndMasks { get; set; }
         public DbSet<BgpPeer> BgpPeers { get; set; }
         public DbSet<ContractBandwidthPool> ContractBandwidthPools { get; set; }
         public DbSet<Device> Devices { get; set; }
@@ -31,7 +32,7 @@ namespace MINDOnContainers.Services.Attachment.Infrastructure
         public DbSet<DeviceRoleAttachmentRole> DeviceRoleAttachmentRoles { get; set; }
         public DbSet<Interface> Interfaces { get; set; }
         public DbSet<Port> Ports { get; set; }
-        public DbSet<RoutingInstance> RoutingInstance { get; set; }
+        public DbSet<RoutingInstance> RoutingInstances { get; set; }
         public DbSet<Vlan> Vlans { get; set; }
 
         private readonly IMediator _mediator;
@@ -51,6 +52,21 @@ namespace MINDOnContainers.Services.Attachment.Infrastructure
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new AttachmentEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new BundleAttachmentEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new VifEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new InterfaceEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new VifRoleEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new AttachmentRoleEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new RoutingInstanceEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new DeviceEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new DeviceRoleEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new DeviceRoleAttachmentRoleEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new Ipv4AddressAndMaskEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new VlanEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ContractBandwidthPoolEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new PortEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new BgpPeerEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new PortStatusEntityTypeConfiguration());
         }
 
         public async Task<bool> SaveEntitiesAsync(CancellationToken cancellationToken = default(CancellationToken))

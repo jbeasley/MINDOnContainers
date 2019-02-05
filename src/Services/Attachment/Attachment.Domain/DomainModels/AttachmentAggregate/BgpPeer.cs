@@ -97,7 +97,7 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
                      .FirstOrDefault(
                         v =>
                         {
-                            var ipv4 = v.GetIpv4Address();
+                            var ipv4 = v.Ipv4AddressAndMask;
                             return IPNetwork.TryParse(ipv4.Ipv4Address, ipv4.Ipv4SubnetMask, out IPNetwork network) && 
                                 network.Contains(ipv4PeerAddress);
                         });
@@ -109,7 +109,7 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
                      .FirstOrDefault(
                         i =>
                         {
-                            var ipv4 = i.GetIpv4Address();
+                            var ipv4 = i.Ipv4AddressAndMask;
                             return IPNetwork.TryParse(ipv4.Ipv4Address, ipv4.Ipv4SubnetMask, out IPNetwork network) && 
                                 network.Contains(ipv4PeerAddress);
                         });

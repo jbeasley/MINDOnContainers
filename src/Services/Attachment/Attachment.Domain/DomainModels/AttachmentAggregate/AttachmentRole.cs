@@ -42,6 +42,7 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
             if (RequireRoutingInstance)
             {
                 RoutingInstanceType = routingInstanceType ?? throw new ArgumentNullException(nameof(RoutingInstanceType));
+                this._routingInstanceTypeId = routingInstanceType.Id;
             }
         }
     }

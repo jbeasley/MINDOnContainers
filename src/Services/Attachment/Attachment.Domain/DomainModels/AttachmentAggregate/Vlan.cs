@@ -6,7 +6,8 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
 {
     public class Vlan : Entity
     {
-        private Ipv4AddressAndMask _ipv4AddressAndMask;
+        private readonly int? _ipv4AddressAndMaskId;
+        public Ipv4AddressAndMask Ipv4AddressAndMask { get; private set; }
 
         public Vlan(Ipv4AddressAndMask ipv4Address = null)
         {
@@ -17,14 +18,12 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
         {
             if (IPNetwork.TryParse(ipv4Address.Ipv4Address, ipv4Address.Ipv4SubnetMask, out IPNetwork network))
             {
-                _ipv4AddressAndMask = new Ipv4AddressAndMask(network.FirstUsable.ToString(), network.Netmask.ToString());
+                this.Ipv4AddressAndMask = new Ipv4AddressAndMask(network.FirstUsable.ToString(), network.Netmask.ToString());
             }
             else
             {
                 throw new AttachmentDomainException($"Invalid IPv4 address/mask - '{ipv4Address.Ipv4Address}, {ipv4Address.Ipv4SubnetMask}'");
             }
         }
-
-        public Ipv4AddressAndMask GetIpv4Address() => _ipv4AddressAndMask;
     }
 }

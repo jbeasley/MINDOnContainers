@@ -15,7 +15,6 @@ namespace MINDOnContainers.Services.Attachment.Infrastructure.EntityConfiguratio
             ipv4AddressAndMaskConfiguration.Property(o => o.Id)
                 .ForSqlServerUseSequenceHiLo("ipv4addressandmaskseq", AttachmentContext.DEFAULT_SCHEMA);
                 
-
             ipv4AddressAndMaskConfiguration.Property<string>("Ipv4Address").IsRequired();
             ipv4AddressAndMaskConfiguration.Property<string>("Ipv4SubnetMask").IsRequired();
                             

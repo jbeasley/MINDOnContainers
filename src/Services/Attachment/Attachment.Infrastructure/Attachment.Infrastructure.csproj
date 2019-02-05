@@ -129,6 +129,11 @@
     <Compile Include="EntityConfigurations\Ipv4AddressAndMaskEntityTypeConfiguration.cs" />
     <Compile Include="EntityConfigurations\PortEntityTypeConfiguration.cs" />
     <Compile Include="EntityConfigurations\PortStatusEntityTypeConfiguration.cs" />
+    <Compile Include="EntityConfigurations\RoutingInstanceEntityTypeConfiguration.cs" />
+    <Compile Include="EntityConfigurations\VifRoleEntityTypeConfiguration.cs" />
+    <Compile Include="EntityConfigurations\VlanEntityTypeConfiguration.cs" />
+    <Compile Include="EntityConfigurations\DeviceRoleAttachmentRoleEntityTypeConfiguration.cs" />
+    <Compile Include="EntityConfigurations\BundleAttachmentEntityTypeConfiguration.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Attachment.Domain\Attachment.Domain.csproj">

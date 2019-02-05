@@ -22,6 +22,7 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
         private readonly List<Vif> _vifs;
         public IReadOnlyCollection<Vif> Vifs => _vifs;
         private readonly List<BgpPeer> _bgpPeers;
+        public IReadOnlyCollection<BgpPeer> BgpPeers => _bgpPeers;
 
         protected RoutingInstance()
         {
@@ -54,8 +55,8 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
             this._routingInstanceTypeId = type.Id;
             this._routeDistinguisherRange = range;
 
-            // Must assign a route distinguisher to this routing instance if the routing instance is for a VRF
-            // Note the Default routing instance must not be assigned a route distinguisher
+            // Must assign a route distinguisher to this routing instance if the routing instance type is VRF
+            // Note the Default routing instance type must not be assigned a route distinguisher
             if (type == RoutingInstanceType.Vrf)
             {
                 AssignRouteDistinguisher(administratorSubField, assignedNumberSubField, range);

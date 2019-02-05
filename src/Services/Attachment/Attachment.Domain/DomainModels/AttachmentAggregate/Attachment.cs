@@ -21,7 +21,7 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
         public RoutingInstance RoutingInstance { get; private set; }
         public ContractBandwidthPool ContractBandwidthPool { get; private set; }
         private readonly int _attachmentRoleId;
-        private readonly AttachmentRole _attachmentRole;
+        public AttachmentRole AttachmentRole { get; private set; }
         private readonly int _mtuId;
         public Mtu Mtu { get; private set; }
         private readonly List<Interface> _interfaces;

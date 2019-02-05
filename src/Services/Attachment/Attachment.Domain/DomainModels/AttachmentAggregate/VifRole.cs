@@ -6,6 +6,7 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
     public class VifRole : Entity
     {
         public string Name { get; private set; }
+        private readonly int? _routingInstanceTypeId;
         public RoutingInstanceType RoutingInstanceType { get; private set; }
         public bool IsLayer3Role { get; private set; }       
         public bool IsTenantFacing { get; private set; }
@@ -21,7 +22,11 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
             IsTenantFacing = isTenantFacing;
             RequireContractBandwidth = requireContractBandwidth;
             RequireRoutingInstance = requireRoutingInstance;
-            if (RequireRoutingInstance) RoutingInstanceType = routingInstanceType ?? throw new ArgumentNullException(nameof(RoutingInstanceType));
+            if (RequireRoutingInstance)
+            {
+                RoutingInstanceType = routingInstanceType ?? throw new ArgumentNullException(nameof(RoutingInstanceType));
+                _routingInstanceTypeId = routingInstanceType.Id;
+            }
         }
     }
 }
