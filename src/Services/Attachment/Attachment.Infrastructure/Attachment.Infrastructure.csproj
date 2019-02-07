@@ -114,17 +114,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\AttachmentRepository.cs" />
     <Compile Include="AttachmentContext.cs" />
     <Compile Include="MediatorExtensions.cs" />
     <Compile Include="EntityConfigurations\AttachmentEntityTypeConfiguration.cs" />
     <Compile Include="EntityConfigurations\VifEntityTypeConfiguration.cs" />
-    <Compile Include="EntityConfigurations\DeviceEntityTypeConfiguration.cs" />
     <Compile Include="EntityConfigurations\AttachmentRoleEntityTypeConfiguration.cs" />
     <Compile Include="EntityConfigurations\BgpPeerEntityTypeConfiguration.cs" />
     <Compile Include="EntityConfigurations\ContractBandwidthPoolEntityTypeConfiguration.cs" />
-    <Compile Include="EntityConfigurations\DeviceRoleEntityTypeConfiguration.cs" />
     <Compile Include="EntityConfigurations\InterfaceEntityTypeConfiguration.cs" />
     <Compile Include="EntityConfigurations\Ipv4AddressAndMaskEntityTypeConfiguration.cs" />
     <Compile Include="EntityConfigurations\PortEntityTypeConfiguration.cs" />
@@ -132,8 +129,8 @@
     <Compile Include="EntityConfigurations\RoutingInstanceEntityTypeConfiguration.cs" />
     <Compile Include="EntityConfigurations\VifRoleEntityTypeConfiguration.cs" />
     <Compile Include="EntityConfigurations\VlanEntityTypeConfiguration.cs" />
-    <Compile Include="EntityConfigurations\DeviceRoleAttachmentRoleEntityTypeConfiguration.cs" />
     <Compile Include="EntityConfigurations\BundleAttachmentEntityTypeConfiguration.cs" />
+    <Compile Include="EntityConfigurations\AttachmentStatusEntityTypeConfiguration.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Attachment.Domain\Attachment.Domain.csproj">
@@ -143,9 +140,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Attachment.Infrastructure.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="EntityConfigurations\" />
+    <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

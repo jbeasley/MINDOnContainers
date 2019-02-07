@@ -6,62 +6,40 @@ using System;
 using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
-using MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAggregate;
-using MINDOnContainers.Services.Attachment.Domain.SeedWork;
-using MINDOnContainers.Services.Attachment.Infrastructure.EntityConfigurations;
+using MINDOnContainers.Services.InfrastructureServices.Device.Domain.DomainModels.DeviceAggregate;
+using MINDOnContainers.Services.InfrastructureServices.Device.Domain.SeedWork;
+using MINDOnContainers.Services.InfrastructureServices.Device.Infrastructure.EntityConfigurations;
 
-namespace MINDOnContainers.Services.Attachment.Infrastructure
+namespace MINDOnContainers.Services.InfrastructureServices.Device.Infrastructure
 {
     /// <summary>
     /// Creates the database context
     /// </summary>
-    public class AttachmentContext : DbContext, IUnitOfWork
+    public class DeviceContext : DbContext, IUnitOfWork
     { 
-        public const string DEFAULT_SCHEMA = "attachment";
+        public const string DEFAULT_SCHEMA = "device";
 
-        public DbSet<Domain.DomainModels.AttachmentAggregate.Attachment> Attachments { get; set; }
-        public DbSet<SingleAttachment> SingleAttachments { get; set; }
-        public DbSet<BundleAttachment> BundleAttachments { get; set; }
-        public DbSet<VifRole> VifRoles { get; set; }
-        public DbSet<Vif> Vifs { get; set; }
-        public DbSet<Ipv4AddressAndMask> Ipv4AddressesAndMasks { get; set; }
-        public DbSet<BgpPeer> BgpPeers { get; set; }
-        public DbSet<ContractBandwidthPool> ContractBandwidthPools { get; set; }
-        public DbSet<Interface> Interfaces { get; set; }
+        public DbSet<Device> Devices { get; set; }
         public DbSet<Port> Ports { get; set; }
-        public DbSet<RoutingInstance> RoutingInstances { get; set; }
-        public DbSet<Vlan> Vlans { get; set; }
 
         private readonly IMediator _mediator;
         private IDbContextTransaction _currentTransaction;
 
-        private AttachmentContext(DbContextOptions<AttachmentContext> options) : base(options) { }
+        private DeviceContext(DbContextOptions<DeviceContext> options) : base(options) { }
 
         public IDbContextTransaction GetCurrentTransaction => _currentTransaction;
 
-        public AttachmentContext(DbContextOptions<AttachmentContext> options, IMediator mediator) : base(options)
+        public DeviceContext(DbContextOptions<DeviceContext> options, IMediator mediator) : base(options)
         {
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
 
-            System.Diagnostics.Debug.WriteLine("AttachmentContext::ctor ->" + this.GetHashCode());
+            System.Diagnostics.Debug.WriteLine("DeviceContext::ctor ->" + this.GetHashCode());
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.ApplyConfiguration(new AttachmentEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new BundleAttachmentEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new VifEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new InterfaceEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new VifRoleEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new AttachmentRoleEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new RoutingInstanceEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new Ipv4AddressAndMaskEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new VlanEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new ContractBandwidthPoolEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new DeviceEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new PortEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new BgpPeerEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new PortStatusEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new AttachmentStatusEntityTypeConfiguration());
         }
 
         public async Task<bool> SaveEntitiesAsync(CancellationToken cancellationToken = default(CancellationToken))
@@ -125,14 +103,14 @@ namespace MINDOnContainers.Services.Attachment.Infrastructure
         }
     }
 
-    public class OrderingContextDesignFactory : IDesignTimeDbContextFactory<AttachmentContext>
+    public class OrderingContextDesignFactory : IDesignTimeDbContextFactory<DeviceContext>
     {
-        public AttachmentContext CreateDbContext(string[] args)
+        public DeviceContext CreateDbContext(string[] args)
         {
-            var optionsBuilder = new DbContextOptionsBuilder<AttachmentContext>()
+            var optionsBuilder = new DbContextOptionsBuilder<DeviceContext>()
                 .UseSqlServer("Server=.;Initial Catalog=MINDOneContainers.Services.AttachmentDb;Integrated Security=true");
 
-            return new AttachmentContext(optionsBuilder.Options, new NoMediator());
+            return new DeviceContext(optionsBuilder.Options, new NoMediator());
         }
 
         class NoMediator : IMediator

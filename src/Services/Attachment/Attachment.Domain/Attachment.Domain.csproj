@@ -59,20 +59,17 @@
     <Compile Include="DomainModels\AttachmentAggregate\VifRole.cs" />
     <Compile Include="DomainModels\AttachmentAggregate\VlanTagRange.cs" />
     <Compile Include="Exceptions\AttachmentDomainException.cs" />
-    <Compile Include="DomainModels\AttachmentAggregate\PortStatus.cs" />
-    <Compile Include="DomainModels\AttachmentAggregate\Device.cs" />
     <Compile Include="DomainModels\AttachmentAggregate\BundleAttachment.cs" />
     <Compile Include="DomainModels\AttachmentAggregate\Ipv4AddressAndMask.cs" />
     <Compile Include="DomainModels\AttachmentAggregate\RoutingInstance.cs" />
     <Compile Include="DomainModels\AttachmentAggregate\BgpPeer.cs" />
-    <Compile Include="DomainModels\AttachmentAggregate\DeviceRole.cs" />
-    <Compile Include="DomainModels\AttachmentAggregate\DeviceRoleAttachmentRole.cs" />
     <Compile Include="DomainModels\AttachmentAggregate\RoutingInstanceType.cs" />
     <Compile Include="DomainModels\AttachmentAggregate\AttachmentBandwidth.cs" />
     <Compile Include="DomainModels\AttachmentAggregate\RouteDistinguisherRange.cs" />
     <Compile Include="DomainModels\AttachmentAggregate\NetworkStatus.cs" />
     <Compile Include="DomainModels\AttachmentAggregate\SingleAttachment.cs" />
     <Compile Include="Events\AttachmentInitialisedDomainEvent.cs" />
+    <Compile Include="DomainModels\AttachmentAggregate\AttachmentStatus.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

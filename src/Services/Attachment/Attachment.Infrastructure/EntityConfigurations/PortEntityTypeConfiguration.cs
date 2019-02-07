@@ -16,16 +16,11 @@ namespace MINDOnContainers.Services.Attachment.Infrastructure.EntityConfiguratio
                 .ForSqlServerUseSequenceHiLo("portseq", AttachmentContext.DEFAULT_SCHEMA);
                 
 
-            portConfiguration.Property<int>("StatusId").IsRequired();
             portConfiguration.Property<int>("PortBandwidthGbps").IsRequired();
-            portConfiguration.Property<int>("PortPoolId").IsRequired();
+            portConfiguration.Property<int>("PortId").IsRequired();
+            portConfiguration.Property<int>("PortName").IsRequired();
             portConfiguration.Property<int>("TenantId").IsRequired(false);
 
-            portConfiguration.HasOne<PortStatus>()
-                .WithMany()
-                .HasForeignKey("PortStatusId")
-                .IsRequired()
-                .OnDelete(DeleteBehavior.Restrict);
                 
         }
     }

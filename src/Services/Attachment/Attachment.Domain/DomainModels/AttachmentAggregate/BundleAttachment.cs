@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using MINDOnContainers.Services.Attachment.Domain.Events;
 using MINDOnContainers.Services.Attachment.Domain.Exceptions;
 
@@ -10,10 +11,10 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
         private int? _bundleMaxLinks;
 
         public BundleAttachment(string description, string notes, AttachmentBandwidth attachmentBandwidth,
-            AttachmentRole role, Mtu mtu, Device device, RoutingInstance routingInstance = null, 
+            AttachmentRole role, Mtu mtu, string locationName, string planeName = null,
             List<Ipv4AddressAndMask> ipv4Addresses = null, int? tenantId = null, int? bundleMinLinks = null, 
             int? bundleMaxLinks = null) 
-            : base(description, notes, attachmentBandwidth, role, mtu, device, routingInstance, ipv4Addresses, tenantId)
+            : base(description, notes, attachmentBandwidth, role, mtu, tenantId)
         { 
 
             // Check the requested bandwidth for the attachment is supported by a bundle
@@ -22,10 +23,7 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
                 throw new AttachmentDomainException($"The requested bandwidth, '{attachmentBandwidth.BandwidthGbps} Gbps', " +
                 	"is not supported by a bundle attachment.");
             }
-
-            // Assign some ports to the bundle attachment
-            var ports = base.AssignPorts(attachmentBandwidth.GetNumberOfPortsRequiredForBundle().Value, attachmentBandwidth.BundleOrMultiPortMemberBandwidthGbps.Value);
-
+                      
             // Default values for min/max bundle links
             if (bundleMinLinks.HasValue) 
             {
@@ -45,11 +43,11 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
                 this._bundleMaxLinks = attachmentBandwidth.GetNumberOfPortsRequiredForBundle();
             }
 
-            // Create some interfaces and assign IP addresses if the attachment is enabled for layer 3
-            base.CreateInterfaces(ipv4Addresses, ports);
+            this.AttachmentStatus = AttachmentStatus.AwaitingPortAssignments;
 
-            // Raise a domain event to notify listeners that a new bundle attachment has been initialised
-            this.AddDomainEvent(new AttachmentInitialisedDomainEvent(this));
+            // Raise a domain event to notify listeners that a new bundle attachment has been initialised and is awaiting port assignments
+            this.AddDomainEvent(new AttachmentInitialisedDomainEvent(this, attachmentBandwidth.GetNumberOfPortsRequiredForBundle().Value,
+            attachmentBandwidth.BundleOrMultiPortMemberBandwidthGbps.Value, locationName, this.AttachmentRole.PortPoolId, planeName));
         }             
 
         /// <summary>
@@ -79,6 +77,17 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
 
             this._bundleMinLinks = bundleMinLinks;
             this._bundleMaxLinks = bundleMaxLinks;
+        }
+
+        public override void AddPorts(List<Port> ports)
+        {
+            if (!ports.Any()) throw new AttachmentDomainException($"No ports were found when attempting to add ports for attachment '{this.Name}'");
+            var numPortsExpected = this.AttachmentBandwidth.GetNumberOfPortsRequiredForBundle();
+
+            if (ports.Count > numPortsExpected) throw new AttachmentDomainException($"Expected {numPortsExpected} ports but got {ports.Count} when attempting " +
+            	$"to add ports for attachment '{this.Name}'.");
+
+            ports.ForEach(port => this.Interfaces.Single().AddPort(port));
         }
     }
 }

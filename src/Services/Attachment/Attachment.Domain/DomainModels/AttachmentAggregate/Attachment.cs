@@ -14,10 +14,9 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
         private readonly bool _isTagged;
         private readonly bool _isLayer3;
         private readonly int? _tenantId;
-        public  AttachmentBandwidth AttachmentBandwidth { get; private set; }
-        private readonly int _deviceId;
-        private readonly Device _device;
-        private readonly int _routingInstanceId;
+        public AttachmentBandwidth AttachmentBandwidth { get; private set; }
+        private int _deviceId;
+        private int _routingInstanceId;
         public RoutingInstance RoutingInstance { get; private set; }
         public ContractBandwidthPool ContractBandwidthPool { get; private set; }
         private readonly int _attachmentRoleId;
@@ -28,33 +27,24 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
         public IReadOnlyCollection<Interface> Interfaces => _interfaces;
         private readonly List<Vif> _vifs;
         public IReadOnlyCollection<Vif> Vifs => _vifs;
-        private bool _created;
+        private readonly int _attachmentStatusId;
         private readonly int _networkStatusId;
+        public AttachmentStatus AttachmentStatus { get; protected set; }
 
         protected Attachment()
         {
             _interfaces = new List<Interface>();
             _vifs = new List<Vif>();
-            _created = true;
+            _attachmentStatusId = AttachmentStatus.Initialised.Id;
+            AttachmentStatus = AttachmentStatus.Initialised;
             _networkStatusId = NetworkStatus.Init.Id;
         }
 
         protected Attachment(string description, string notes, AttachmentBandwidth attachmentBandwidth, 
-            AttachmentRole role, Mtu mtu, Device device, RoutingInstance routingInstance = null, 
-            List<Ipv4AddressAndMask> ipv4Addresses = null, int? tenantId = null) : this()
+            AttachmentRole role, Mtu mtu, int? tenantId = null) : this()
         {
-            this._device = device ?? throw new ArgumentNullException(nameof(device));
-            this._deviceId = device.Id;
-            this._attachmentRole = role ?? throw new ArgumentNullException(nameof(role));
+            this.AttachmentRole = role ?? throw new ArgumentNullException(nameof(role));
             this._attachmentRoleId = role.Id;
-
-            // The supplied attachment role must be compatible with the supplied device
-            if (!device.DeviceRole.DeviceRoleAttachmentRoles
-                                  .Select(d => d.AttachmentRole)
-                                  .Contains(role))
-            {
-                throw new AttachmentDomainException($"Attachment role '{this._attachmentRole.Name}' is not valid for device '{device.Name}' ");
-            }
 
             // Must have a tenant specified for a tenant-facing attachment
             if (role.IsTenantFacing)
@@ -73,16 +63,24 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
             this._notes = notes;
             this._isLayer3 = role.IsLayer3Role;
             this._isTagged = role.IsTaggedRole;
-            this._created = true;
             this.Mtu = mtu ?? throw new ArgumentNullException(nameof(mtu));
             this._mtuId = mtu.Id;
+        }
 
-            if (role.RequireRoutingInstance)
+        public void SetDescription(string description) => this._description = description;
+        public void SetNotes(string notes) => this._notes = notes;
+        public void SetMtu(Mtu mtu) => this.Mtu = mtu;
+        public List<ContractBandwidthPool> GetContractBandwidthPools() => this.Vifs.Select(vif => vif.ContractBandwidthPool).ToList();
+        public void SetDeviceId(int deviceId) => _deviceId = deviceId;
+
+        public void SetOrCreateRoutingInstance(RoutingInstance routingInstance = null)
+        {
+            if (this.AttachmentRole.RequireRoutingInstance)
             {
                 if (routingInstance != null)
                 {
                     // Check the supplied routing instance is of a valid type
-                    CheckRoutingInstanceType(routingInstance.RoutingInstanceType);
+                    CheckRoutingInstance(routingInstance);
 
                     // It must be good!
                     this.RoutingInstance = routingInstance;
@@ -91,16 +89,12 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
                 else
                 {
                     // Create a new routing instance
-                    this.RoutingInstance = CreateRoutingInstance(role.RoutingInstanceType, this._tenantId);
+                    this.RoutingInstance = CreateRoutingInstance(this.AttachmentRole.RoutingInstanceType, this._tenantId);
                 }
             }
         }
 
-        public void SetDescription(string description) => this._description = description;
-        public void SetNotes(string notes) => this._notes = notes;
-        public void ClearCreated() => this._created = false;
-        public void SetMtu(Mtu mtu) => this.Mtu = mtu;
-        public List<ContractBandwidthPool> GetContractBandwidthPools() => this.Vifs.Select(vif => vif.ContractBandwidthPool).ToList();
+        public abstract void AddPorts(List<Port> ports);
 
         /// <summary>
         /// Adds a vif to the attachment.
@@ -120,7 +114,7 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
             List<Ipv4AddressAndMask> ipv4Addresses, bool trustReceivedCosAndDscp = false, int? tenantId = null, int? vlanTag = null)
         {
             // The supplied vif role must be compatible with the attachment
-            if (!this._attachmentRole.VifRoles.Contains(role))
+            if (!this.AttachmentRole.VifRoles.Contains(role))
             {
                 throw new AttachmentDomainException($"Vif role '{role.Name}' is not valid for attachment '{this.Name}' ");
             }
@@ -161,7 +155,7 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
                 if (!this.GetContractBandwidthPools().Contains(contractBandwidthPool))
                 {
                     throw new AttachmentDomainException($"The supplied contract bandwidth pool does not exist or does not belong to " +
-                    	"attachment '{this.Name}'.");
+                        "attachment '{this.Name}'.");
                 }
             }
 
@@ -173,7 +167,7 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
                 if (availableBandwidthMbps < contractBandwidth.BandwidthMbps)
                 {
                     throw new AttachmentDomainException($"Insufficient bandwidth remaining. Attachment '{this.Name}' has '{availableBandwidthMbps}' " +
-                    	"Mbps available.");
+                        "Mbps available.");
                 }
 
                 contractBandwidthPool = new ContractBandwidthPool(contractBandwidth, trustReceivedCosAndDscp, tenantId);
@@ -183,7 +177,7 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
             {
                 if (routingInstance != null)
                 {
-                    CheckRoutingInstanceType(routingInstance.RoutingInstanceType);
+                    CheckRoutingInstance(routingInstance);
                 }
                 else
                 {
@@ -208,44 +202,12 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
         }
 
         /// <summary>
-        /// Assign ports from the device to the attachment.
-        /// </summary>
-        /// <returns>The ports.</returns>
-        /// <param name="numPortsRequired">Number ports required.</param>
-        /// <param name="portBandwidthRequiredGbps">Port bandwidth required gbps.</param>
-        protected internal virtual List<Port> AssignPorts(int numPortsRequired, int portBandwidthRequiredGbps)
-        {
-            if (numPortsRequired <= 0) throw new AttachmentDomainException("Number of ports required for the attachment must be greater than 0.");
-
-            // Get free ports from the device which belong to the required port pool and are of the required port bandwidth
-            List<Port> ports = this._device.Ports.Where(
-                                   port =>
-                                   port.GetPortStatus() == PortStatus.Free &&
-                                   port.GetPortBandwidthGbps() == portBandwidthRequiredGbps &&
-                                   port.GetPortPoolId() == this._attachmentRole.PortPoolId)
-                                   .Take(numPortsRequired)
-                                   .ToList();
-
-            // Check we have the required number of ports - the 'take' method will only return the number of ports found which may be 
-            // less than the required number
-            if (ports.Count() != numPortsRequired) throw new AttachmentDomainException("Could not find a sufficient number of free ports " +
-                $"matching the requirements. {numPortsRequired} ports of {portBandwidthRequiredGbps} Gbps are required but {ports.Count()} free " +
-                	"ports were found.");
-
-            // Assign the ports
-            ports.ForEach(port => port.Assign(this._tenantId));
-
-            return ports;
-        }
-
-        /// <summary>
         /// Create interfaces for the attachment.
         /// </summary>
         /// <param name="ipv4Addresses">Ipv4 addresses.</param>
-        /// <param name="ports">Ports.</param>
-        protected internal virtual void CreateInterfaces(List<Ipv4AddressAndMask> ipv4Addresses, List<Port> ports)
+        protected internal virtual void CreateInterfaces(List<Ipv4AddressAndMask> ipv4Addresses)
         {
-            var @interface = new Interface(ports: ports);
+            var @interface = new Interface();
 
             if (_isLayer3)
             {
@@ -267,7 +229,7 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
                 if (ipv4Addresses.Count != this._interfaces.Count)
                 {
                     throw new AttachmentDomainException($"Insufficient IPv4 addresses provided to create vlans for a new vif for attachment '{this.Name}'. " +
-                    	$"{ipv4Addresses.Count} were supplied but {this._interfaces.Count} are required.");
+                        $"{ipv4Addresses.Count} were supplied but {this._interfaces.Count} are required.");
                 }
             }
 
@@ -308,17 +270,28 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
         }
 
         /// <summary>
-        /// Checks the type of the routing instance to ensure compatiibility with the role of the attachment.
+        /// Checks the routing instance to ensure it exists for the assigned device and that 
+        /// the routing instance type is compatiibile with the role of the attachment.
         /// </summary>
-        /// <param name="routingInstanceType">Routing instance type.</param>
-        private void CheckRoutingInstanceType(RoutingInstanceType routingInstanceType)
+        /// <param name="routingInstance">Routing instance</param>
+        private void CheckRoutingInstance(RoutingInstance routingInstance)
         {
-            if (this._attachmentRole.IsTenantFacing) 
+            if (this._device == null)
             {
-                if (routingInstanceType.Name != RoutingInstanceType.Vrf.Name)
+                throw new AttachmentDomainException($"The routing instance '{routingInstance.Name}' cannot be checked because a device has not yet been assigned.");
+            }
+
+            if (!this._device.RoutingInstances.Contains(routingInstance))
+            {
+                throw new AttachmentDomainException($"Routing instance '{routingInstance.Name}' does not belong to the assigned device.");
+            }
+
+            if (this.AttachmentRole.IsTenantFacing) 
+            {
+                if (routingInstance.RoutingInstanceType.Name != RoutingInstanceType.Vrf.Name)
                 {
-                    throw new AttachmentDomainException($"Routing instance type '{routingInstanceType.Name}' " +
-                    	"cannot be used to create a routing instance for a tenant-facing attachment.");
+                    throw new AttachmentDomainException($"Routing instance type '{routingInstance.RoutingInstanceType.Name}' " +
+                        "cannot be used to create a routing instance for a tenant-facing attachment.");
                 }
             }
         }
@@ -331,6 +304,11 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
         /// <param name="tenantId">Tenant identifier.</param>
         private RoutingInstance CreateRoutingInstance(RoutingInstanceType routingInstanceType, int? tenantId = null)
         {
+            if (this._device == null)
+            {
+                throw new AttachmentDomainException($"A routing instance cannot be created because a device has not yet been assigned.");
+            }
+
             var routingInstance = new RoutingInstance(device: this._device, type: routingInstanceType, tenantId: tenantId);
             this._device.AddRoutingInstance(routingInstance);
 

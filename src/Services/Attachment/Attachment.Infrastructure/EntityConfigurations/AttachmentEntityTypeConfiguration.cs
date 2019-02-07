@@ -27,7 +27,8 @@ namespace MINDOnContainers.Services.Attachment.Infrastructure.EntityConfiguratio
             attachmentConfiguration.Property<int>("RoutingInstanceId").IsRequired(false);
             attachmentConfiguration.Property<int>("AttachmentRoleId").IsRequired();
             attachmentConfiguration.Property<int>("DeviceId").IsRequired();
-            attachmentConfiguration.Property<int>("NetworkStatusId").IsRequired(false);
+            attachmentConfiguration.Property<int>("NetworkStatusId").IsRequired();
+            attachmentConfiguration.Property<int>("AttachmentStatusId").IsRequired();
             attachmentConfiguration.Property<int>("MtuId").IsRequired();
             attachmentConfiguration.Property<bool>("Created").IsRequired();
 
