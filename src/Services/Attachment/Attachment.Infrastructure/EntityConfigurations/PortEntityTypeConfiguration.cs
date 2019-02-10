@@ -15,13 +15,10 @@ namespace MINDOnContainers.Services.Attachment.Infrastructure.EntityConfiguratio
             portConfiguration.Property(o => o.Id)
                 .ForSqlServerUseSequenceHiLo("portseq", AttachmentContext.DEFAULT_SCHEMA);
                 
-
             portConfiguration.Property<int>("PortBandwidthGbps").IsRequired();
             portConfiguration.Property<int>("PortId").IsRequired();
             portConfiguration.Property<int>("PortName").IsRequired();
-            portConfiguration.Property<int>("TenantId").IsRequired(false);
-
-                
+                          
         }
     }
 }

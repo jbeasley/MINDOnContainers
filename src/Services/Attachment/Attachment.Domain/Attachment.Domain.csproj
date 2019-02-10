@@ -1,82 +1,29 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{B70408EA-7B40-40D5-9032-7FA9E114B6C5}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>Attachment.Domain</RootNamespace>
-    <AssemblyName>Attachment.Domain</AssemblyName>
-    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug</OutputPath>
-    <DefineConstants>DEBUG;</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <ConsolePause>false</ConsolePause>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release</OutputPath>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <ConsolePause>false</ConsolePause>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Net.IPNetwork">
-      <HintPath>..\..\..\..\packages\IPNetwork2.2.2.0.78\lib\net46\System.Net.IPNetwork.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
-    <Reference Include="MediatR">
-      <HintPath>..\..\..\..\packages\MediatR.6.0.0\lib\net461\MediatR.dll</HintPath>
-    </Reference>
+    <PackageReference Include="MediatR" Version="5.1.0" />
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="5.1.0" />
+    <PackageReference Include="System.Reflection.TypeExtensions" Version="4.4.0" />
+    <PackageReference Include="IPNetwork2" Version="2.2.0.78" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties\" />
+    <Folder Include="DomainModels\AttachmentRoleAggregate\" />
+    <Folder Include="DomainModels\AttachmentBandwidthAggregate\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="DomainModels\IAttachmentRepository.cs" />
-    <Compile Include="DomainModels\AttachmentAggregate\Attachment.cs" />
-    <Compile Include="DomainModels\AttachmentAggregate\Interface.cs" />
-    <Compile Include="SeedWork\Entity.cs" />
-    <Compile Include="SeedWork\Enumeration.cs" />
-    <Compile Include="SeedWork\IAggregateRoot.cs" />
-    <Compile Include="SeedWork\IRepository.cs" />
-    <Compile Include="SeedWork\IUnitOfWork.cs" />
-    <Compile Include="SeedWork\ValueObject.cs" />
-    <Compile Include="DomainModels\AttachmentAggregate\Port.cs" />
-    <Compile Include="DomainModels\AttachmentAggregate\Vif.cs" />
-    <Compile Include="DomainModels\AttachmentAggregate\Vlan.cs" />
-    <Compile Include="DomainModels\AttachmentAggregate\ContractBandwidthPool.cs" />
-    <Compile Include="DomainModels\AttachmentAggregate\AttachmentRole.cs" />
-    <Compile Include="DomainModels\AttachmentAggregate\ContractBandwidth.cs" />
-    <Compile Include="DomainModels\AttachmentAggregate\Mtu.cs" />
-    <Compile Include="DomainModels\AttachmentAggregate\VifRole.cs" />
-    <Compile Include="DomainModels\AttachmentAggregate\VlanTagRange.cs" />
-    <Compile Include="Exceptions\AttachmentDomainException.cs" />
-    <Compile Include="DomainModels\AttachmentAggregate\BundleAttachment.cs" />
-    <Compile Include="DomainModels\AttachmentAggregate\Ipv4AddressAndMask.cs" />
-    <Compile Include="DomainModels\AttachmentAggregate\RoutingInstance.cs" />
-    <Compile Include="DomainModels\AttachmentAggregate\BgpPeer.cs" />
-    <Compile Include="DomainModels\AttachmentAggregate\RoutingInstanceType.cs" />
-    <Compile Include="DomainModels\AttachmentAggregate\AttachmentBandwidth.cs" />
-    <Compile Include="DomainModels\AttachmentAggregate\RouteDistinguisherRange.cs" />
-    <Compile Include="DomainModels\AttachmentAggregate\NetworkStatus.cs" />
-    <Compile Include="DomainModels\AttachmentAggregate\SingleAttachment.cs" />
-    <Compile Include="Events\AttachmentInitialisedDomainEvent.cs" />
-    <Compile Include="DomainModels\AttachmentAggregate\AttachmentStatus.cs" />
+    <Compile Remove="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="Attachment.Domain.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Exceptions\" />
-    <Folder Include="Events\" />
-  </ItemGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

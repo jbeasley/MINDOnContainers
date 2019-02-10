@@ -13,9 +13,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventBusRabbitMQ", "src\Bui
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationEventLogEF", "src\BuildingBlocks\EventBus\IntegrationEventLogEF\IntegrationEventLogEF.csproj", "{A2105738-076C-4EF0-A9C5-68D7AFA842F8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Device.Domain", "src\Services\InfrastructureServices\Device.Domain\Device.Domain.csproj", "{8DAEEACA-A588-45DE-BEFF-EF9E52F13EF5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sigma.Domain", "src\Services\InfrastructureServices\Sigma.Domain\Sigma.Domain.csproj", "{68D8631C-EE70-406D-B2E1-4CAFB657DD05}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Device.Infrastructure", "src\Services\InfrastructureServices\Device.Infrastructure\Device.Infrastructure.csproj", "{9E9A7110-B68A-4001-9FCE-C0A251F2B501}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sigma.Infrastructure", "src\Services\InfrastructureServices\Sigma.Infrastructure\Sigma.Infrastructure.csproj", "{3EA8E9F1-6DFA-4F78-8EDE-7B78AF4CF143}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sigma.API", "src\Services\InfrastructureServices\Sigma.API\Sigma.API.csproj", "{04D03D60-8E69-4B80-BF31-8C50241FA84C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,15 +49,30 @@ Global
 		{A2105738-076C-4EF0-A9C5-68D7AFA842F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A2105738-076C-4EF0-A9C5-68D7AFA842F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A2105738-076C-4EF0-A9C5-68D7AFA842F8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8DAEEACA-A588-45DE-BEFF-EF9E52F13EF5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8DAEEACA-A588-45DE-BEFF-EF9E52F13EF5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8DAEEACA-A588-45DE-BEFF-EF9E52F13EF5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8DAEEACA-A588-45DE-BEFF-EF9E52F13EF5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9E9A7110-B68A-4001-9FCE-C0A251F2B501}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9E9A7110-B68A-4001-9FCE-C0A251F2B501}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9E9A7110-B68A-4001-9FCE-C0A251F2B501}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9E9A7110-B68A-4001-9FCE-C0A251F2B501}.Release|Any CPU.Build.0 = Release|Any CPU
+		{68D8631C-EE70-406D-B2E1-4CAFB657DD05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68D8631C-EE70-406D-B2E1-4CAFB657DD05}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68D8631C-EE70-406D-B2E1-4CAFB657DD05}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68D8631C-EE70-406D-B2E1-4CAFB657DD05}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3EA8E9F1-6DFA-4F78-8EDE-7B78AF4CF143}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3EA8E9F1-6DFA-4F78-8EDE-7B78AF4CF143}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3EA8E9F1-6DFA-4F78-8EDE-7B78AF4CF143}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3EA8E9F1-6DFA-4F78-8EDE-7B78AF4CF143}.Release|Any CPU.Build.0 = Release|Any CPU
+		{04D03D60-8E69-4B80-BF31-8C50241FA84C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04D03D60-8E69-4B80-BF31-8C50241FA84C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04D03D60-8E69-4B80-BF31-8C50241FA84C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{04D03D60-8E69-4B80-BF31-8C50241FA84C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		Policies = $0
+		$0.DotNetNamingPolicy = $1
+		$1.DirectoryNamespaceAssociation = PrefixedHierarchical
+		$0.TextStylePolicy = $2
+		$2.FileWidth = 80
+		$2.TabsToSpaces = True
+		$2.scope = text/x-csharp
+		$0.CSharpFormattingPolicy = $3
+		$3.scope = text/x-csharp
 	EndGlobalSection
 EndGlobal

@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAggregate;
+using MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentRoleAggregate;
 
 namespace MINDOnContainers.Services.Attachment.Infrastructure.EntityConfigurations
 {
@@ -22,12 +22,10 @@ namespace MINDOnContainers.Services.Attachment.Infrastructure.EntityConfiguratio
             vifRoleConfiguration.Property<int>("IsTenantFacing").IsRequired();
             vifRoleConfiguration.Property<int>("RequireContractBandwidth").IsRequired();
 
-            vifRoleConfiguration.HasOne<RoutingInstanceType>()
+            vifRoleConfiguration.HasOne<Domain.DomainModels.AttachmentRoleAggregate.AttachmentRole>()
                 .WithMany()
-                .HasForeignKey("RoutingInstanceTypeId")
-                .IsRequired(false)
-                .OnDelete(DeleteBehavior.Restrict);
-                
+                .IsRequired()
+                .HasForeignKey("AttachmentRoleId");
         }
     }
 }

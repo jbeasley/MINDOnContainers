@@ -32,12 +32,6 @@ namespace MINDOnContainers.Services.Attachment.Infrastructure.EntityConfiguratio
             var vifsNavigation = vifConfiguration.Metadata.FindNavigation(nameof(Vif.Vlans));
             vifsNavigation.SetPropertyAccessMode(PropertyAccessMode.Field);
 
-            vifConfiguration.HasOne<VifRole>()
-                .WithMany()
-                .HasForeignKey("VifRoleId")
-                .IsRequired()
-                .OnDelete(DeleteBehavior.Restrict);
-
             vifConfiguration.HasOne<Domain.DomainModels.AttachmentAggregate.Attachment>()
                 .WithMany()
                 .IsRequired()

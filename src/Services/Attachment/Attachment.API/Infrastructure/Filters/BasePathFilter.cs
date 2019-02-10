@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace Mind.Api.Filters
+namespace MINDOnContainers.Services.Attachment.API.Infrastructure.Filters
 {
     /// <summary>
     /// BasePath Document Filter sets BasePath property of Swagger and removes it from the individual URL paths

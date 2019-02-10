@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAggregate;
 using MINDOnContainers.Services.Attachment.Domain.SeedWork;
 using MINDOnContainers.Services.Attachment.Infrastructure.EntityConfigurations;
+using MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentRoleAggregate;
 
 namespace MINDOnContainers.Services.Attachment.Infrastructure
 {
@@ -22,6 +23,8 @@ namespace MINDOnContainers.Services.Attachment.Infrastructure
         public DbSet<Domain.DomainModels.AttachmentAggregate.Attachment> Attachments { get; set; }
         public DbSet<SingleAttachment> SingleAttachments { get; set; }
         public DbSet<BundleAttachment> BundleAttachments { get; set; }
+        public DbSet<Domain.DomainModels.AttachmentRoleAggregate.AttachmentRole> AttachmentRoles { get; set; }
+        public DbSet<Domain.DomainModels.AttachmentBandwidthAggregate.AttachmentBandwidth> AttachmentBandwidths { get; set; }
         public DbSet<VifRole> VifRoles { get; set; }
         public DbSet<Vif> Vifs { get; set; }
         public DbSet<Ipv4AddressAndMask> Ipv4AddressesAndMasks { get; set; }
@@ -54,24 +57,21 @@ namespace MINDOnContainers.Services.Attachment.Infrastructure
             modelBuilder.ApplyConfiguration(new InterfaceEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VifRoleEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new AttachmentRoleEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new AttachmentBandwidthEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new RoutingInstanceEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new Ipv4AddressAndMaskEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VlanEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ContractBandwidthPoolEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new PortEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new BgpPeerEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new PortStatusEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new AttachmentStatusEntityTypeConfiguration());
         }
 
         public async Task<bool> SaveEntitiesAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
             // Dispatch Domain Events collection. 
-            // Choices:
-            // A) Right BEFORE committing data (EF SaveChanges) into the DB will make a single transaction including  
+            // Doing this right BEFORE committing data (EF SaveChanges) into the DB will make a single transaction including  
             // side effects from the domain event handlers which are using the same DbContext with "InstancePerLifetimeScope" or "scoped" lifetime
-            // B) Right AFTER committing data (EF SaveChanges) into the DB will make multiple transactions. 
-            // You will need to handle eventual consistency and compensatory actions in case of failures in any of the Handlers. 
             await _mediator.DispatchDomainEventsAsync(this);
 
             // After executing this line all the changes (from the Command Handler and Domain Event Handlers) 
@@ -130,7 +130,7 @@ namespace MINDOnContainers.Services.Attachment.Infrastructure
         public AttachmentContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<AttachmentContext>()
-                .UseSqlServer("Server=.;Initial Catalog=MINDOneContainers.Services.AttachmentDb;Integrated Security=true");
+                .UseSqlServer("Server=.;Initial Catalog=MINDOnContainers.Services.AttachmentDb;Integrated Security=true");
 
             return new AttachmentContext(optionsBuilder.Options, new NoMediator());
         }

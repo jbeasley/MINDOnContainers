@@ -15,9 +15,6 @@ namespace MINDOnContainers.Services.Attachment.Infrastructure.EntityConfiguratio
             attachmentConfiguration.Property(o => o.Id)
                 .ForSqlServerUseSequenceHiLo("attachmentseq", AttachmentContext.DEFAULT_SCHEMA);
 
-            //Value objects persisted as owned entity type supported since EF Core 2.0
-            attachmentConfiguration.OwnsOne(o => o.AttachmentBandwidth);
-
             attachmentConfiguration.Property<string>("Name").IsRequired();
             attachmentConfiguration.Property<string>("Description").IsRequired();
             attachmentConfiguration.Property<string>("Notes").IsRequired(false);
@@ -38,18 +35,7 @@ namespace MINDOnContainers.Services.Attachment.Infrastructure.EntityConfiguratio
             vifsNavigation.SetPropertyAccessMode(PropertyAccessMode.Field);
             var interfacesNavigation = attachmentConfiguration.Metadata.FindNavigation(nameof(Domain.DomainModels.AttachmentAggregate.Attachment.Interfaces));
             interfacesNavigation.SetPropertyAccessMode(PropertyAccessMode.Field);
-
-            attachmentConfiguration.HasOne<AttachmentRole>()
-                .WithMany()
-                .HasForeignKey("AttachmentRoleId")
-                .IsRequired()
-                .OnDelete(DeleteBehavior.Restrict);
-
-            attachmentConfiguration.HasOne<Device>()
-                .WithMany()
-                .IsRequired()
-                .HasForeignKey("DeviceId");
-
+                
             attachmentConfiguration.HasOne<RoutingInstance>()
                 .WithMany()
                 .HasForeignKey("RoutingInstanceId")

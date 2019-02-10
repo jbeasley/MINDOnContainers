@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.Controllers;
 using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace Mind.Api.Filters
+namespace MINDOnContainers.Services.Attachment.API.Infrastructure.Filters
 {
     /// <summary>
     /// Path Parameter Validation Rules Filter
