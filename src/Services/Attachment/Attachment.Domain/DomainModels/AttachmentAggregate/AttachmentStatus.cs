@@ -9,7 +9,8 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
     public class AttachmentStatus : Enumeration
     {
         public static AttachmentStatus CreatedAwaitingUni = new AttachmentStatus(1, nameof(CreatedAwaitingUni).ToLowerInvariant());
-        public static AttachmentStatus Active = new AttachmentStatus(2, nameof(Active).ToLowerInvariant());
+        public static AttachmentStatus FailedUni = new AttachmentStatus(2, nameof(FailedUni).ToLowerInvariant());
+        public static AttachmentStatus Active = new AttachmentStatus(3, nameof(Active).ToLowerInvariant());
 
         protected AttachmentStatus()
         {
@@ -20,7 +21,7 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
         }
 
         public static IEnumerable<AttachmentStatus> List() =>
-                new[] { CreatedAwaitingUni, Active };
+                new[] { CreatedAwaitingUni, FailedUni, Active };
 
         public static AttachmentStatus FromName(string name)
         {

@@ -31,7 +31,7 @@ namespace MINDOnContainers.Services.InfrastructureServices.Sigma.Infrastructure.
                 await _context.Entry(sigma)
                     .Collection(i => i.Devices).LoadAsync();
                 await _context.Entry(sigma)
-                    .Collection(i => i.Locations).LoadAsync();
+                    .Collection(i => i.Unis).LoadAsync();
             }
 
             return sigma;

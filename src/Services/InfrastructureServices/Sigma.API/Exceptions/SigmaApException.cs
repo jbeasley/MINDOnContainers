@@ -1,5 +1,5 @@
 ﻿using System;
-namespace MINDOnContainers.Services.Sigma.API.Exceptions
+namespace MINDOnContainers.Services.InfrastructureServices.Sigma.API.Exceptions
 {
     /// <summary>
     /// Exception type for domain exceptions

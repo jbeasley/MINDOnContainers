@@ -20,12 +20,14 @@ namespace MINDOnContainers.Services.InfrastructureServices.Sigma.Domain.DomainMo
         {
             _devices = new List<Device>();
             _locationIds = new List<int>();
+            _unis = new List<Uni>();
         }
 
-        public Sigma(List<Device> devices, List<Plane> planes, List<int> locationIds) : this()
+        public Sigma(List<Device> devices, List<Plane> planes, List<int> locationIds, List<Uni> unis) : this()
         {
-            _devices = devices;
-            _locationIds = locationIds;
+            _devices = devices ?? throw new ArgumentNullException(nameof(devices));
+            _locationIds = locationIds ?? throw new ArgumentNullException(nameof(locationIds));
+            _unis = unis ?? throw new ArgumentNullException(nameof(unis));
         }
 
         /// <summary>
@@ -73,6 +75,7 @@ namespace MINDOnContainers.Services.InfrastructureServices.Sigma.Domain.DomainMo
             // less than the required number
             if (ports.Count() != numPortsRequired)
             {
+                this.AddDomainEvent(new UniCreationFailedDomainEvent(attachmentId);
                 throw new SigmaDomainException("Could not find a sufficient number of free ports " +
                     $"matching the requirements. {numPortsRequired} ports of {portBandwidthRequiredGbps} Gbps are required but {ports.Count()} free " +
                      "ports were found.");
