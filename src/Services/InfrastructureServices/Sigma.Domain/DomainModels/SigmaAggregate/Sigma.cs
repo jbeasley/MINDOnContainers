@@ -13,6 +13,8 @@ namespace MINDOnContainers.Services.InfrastructureServices.Sigma.Domain.DomainMo
         private readonly List<Device> _devices;
         public IReadOnlyCollection<Device> Devices => _devices;
         private readonly List<int> _locationIds;
+        private readonly List<Uni> _unis;
+        public IReadOnlyCollection<Uni> Unis => _unis;
 
         protected Sigma()
         {
@@ -27,12 +29,12 @@ namespace MINDOnContainers.Services.InfrastructureServices.Sigma.Domain.DomainMo
         }
 
         /// <summary>
-        /// Assign some ports 
+        /// Create a UNI for an attachment.
         /// </summary>
         /// <returns>The ports.</returns>
         /// <param name="numPortsRequired">Number ports required.</param>
         /// <param name="portBandwidthRequiredGbps">Port bandwidth required gbps.</param>
-        public List<Port> AssignPorts(int attachmentId, int numPortsRequired, int portBandwidthRequiredGbps, int portPoolId,
+        public Uni CreateUni(int attachmentId, int numPortsRequired, int portBandwidthRequiredGbps, int portPoolId,
         Location location, Plane plane = null, int? tenantId = null)
         {
             if (numPortsRequired <= 0) throw new SigmaDomainException("Number of ports requested must be greater than 0.");
@@ -79,8 +81,11 @@ namespace MINDOnContainers.Services.InfrastructureServices.Sigma.Domain.DomainMo
             // Assign the ports
             ports.ForEach(port => port.Assign(attachmentId, tenantId));
 
-            this.AddDomainEvent(new DeviceAndPortsAssignedDomainEvent(attachmentId, leastLoadedDevice.GetDeviceId(), ports));
-            return ports;
+            var uni = new Uni(leastLoadedDevice, ports, tenantId: tenantId);
+            this._unis.Add(uni);
+
+            this.AddDomainEvent(new UniCreatedDomainEvent(attachmentId, uni));
+            return uni;
         }
     }
 }

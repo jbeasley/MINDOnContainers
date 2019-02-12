@@ -14,9 +14,10 @@ namespace MINDOnContainers.Services.InfrastructureServices.Sigma.Infrastructure.
 
             portConfiguration.Property(o => o.Id)
                 .ForSqlServerUseSequenceHiLo("portseq", SigmaContext.DEFAULT_SCHEMA);
-                
 
-            portConfiguration.Property<int>("StatusId").IsRequired();
+
+            portConfiguration.Property<int>("Name").IsRequired();
+            portConfiguration.Property<int>("LocalDeviceIdentifier").IsRequired();
             portConfiguration.Property<int>("PortBandwidthGbps").IsRequired();
             portConfiguration.Property<int>("PortPoolId").IsRequired();
             portConfiguration.Property<int>("TenantId").IsRequired(false);

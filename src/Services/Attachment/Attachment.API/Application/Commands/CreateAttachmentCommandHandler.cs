@@ -48,19 +48,19 @@ namespace MINDOnContainers.Services.Attachment.API.Application.Commands
 
             if (message.BundleRequired.GetValueOrDefault())
             {
-                var attachment = new BundleAttachment(message.LocationName, message.Description, message.Notes, bandwidth, role, 
+                var attachment = new BundleAttachment(message.TenantId, message.LocationName, message.Description, message.Notes, bandwidth, role, 
                     message.JumboMtuRequired.GetValueOrDefault(), message.PlaneName);
 
                 attachmentDto = _mapper.Map<AttachmentDTO>(attachment);
             }
             else
             {
-                var attachment = new SingleAttachment(message.LocationName, message.Description, message.Notes, bandwidth, role,
+                var attachment = new SingleAttachment(message.TenantId, message.LocationName, message.Description, message.Notes, bandwidth, role,
                     message.JumboMtuRequired.GetValueOrDefault(), message.PlaneName);
 
                 attachmentDto = _mapper.Map<AttachmentDTO>(attachment);
             }
-
+            
             await _attachmentRepository.UnitOfWork.SaveEntitiesAsync();
 
             return attachmentDto;
@@ -71,6 +71,7 @@ namespace MINDOnContainers.Services.Attachment.API.Application.Commands
     {
         public int AttachmentId { get; set; }
         public string Name { get; set; }
+        public string UniName { get; set; }
         public string LocationName { get; set; }
         public string PlaneName { get; set; }
         public int AttachmentBandwidthId { get; set; }
@@ -79,8 +80,6 @@ namespace MINDOnContainers.Services.Attachment.API.Application.Commands
         public int Mtu { get; set; }
         public int? BundleMinLinks { get; set; }
         public int? BundleMaxLinks { get; set; }
-        public string RoutingInstanceName { get; set; }
-        public int AdministratorSubField { get; set; }
-        public int AssignedNumberSubField { get; set; }
+        public string RoutingInstanceId { get; set; }
     }
 }

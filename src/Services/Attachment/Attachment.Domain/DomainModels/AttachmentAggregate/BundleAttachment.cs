@@ -12,11 +12,11 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
         private int _bundleMinLinks;
         private int _bundleMaxLinks;
 
-        public BundleAttachment(string locationName, string description, string notes, AttachmentBandwidth attachmentBandwidth,
+        public BundleAttachment(int tenantId, string locationName, string description, string notes, AttachmentBandwidth attachmentBandwidth,
             AttachmentRole role, bool enableJumboMtu, string planeName = null,
-            List<Ipv4AddressAndMask> ipv4Addresses = null, int? tenantId = null, int? bundleMinLinks = null, 
+            List<Ipv4AddressAndMask> ipv4Addresses = null, int? bundleMinLinks = null, 
             int? bundleMaxLinks = null) 
-            : base(locationName, description, notes, attachmentBandwidth, role, enableJumboMtu, planeName, tenantId)
+            : base(tenantId, locationName, description, notes, attachmentBandwidth, role, enableJumboMtu, planeName)
         { 
 
             // Check the requested bandwidth for the attachment is supported by a bundle
@@ -48,11 +48,11 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
             // Create some interfaces and assign IP addresses if the attachment is enabled for layer 3
             base.CreateInterfaces(role, ipv4Addresses);
 
-            this.AttachmentStatus = AttachmentStatus.AwaitingPortAssignments;
+            this.AttachmentStatus = AttachmentStatus.CreatedAwaitingUni;
 
-            // Raise a domain event to notify listeners that a new bundle attachment has been initialised and is awaiting port assignments
-            this.AddDomainEvent(new AttachmentInitialisedDomainEvent(this, attachmentBandwidth.GetNumberOfPortsRequiredForBundle().Value,
-            attachmentBandwidth.BundleOrMultiPortMemberBandwidthGbps.Value, locationName, role.PortPoolId, planeName));
+            // Raise a domain event to notify listeners that a new attachment has been created
+            this.AddDomainEvent(new AttachmentCreatedDomainEvent(this, attachmentBandwidth.GetNumberOfPortsRequiredForBundle().Value,
+            attachmentBandwidth.BundleOrMultiPortMemberBandwidthGbps.Value, locationName, role.PortPoolId, role.RequireRoutingInstance, planeName));
         }             
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
         /// <param name="bundleMaxLinks">Bundle max links.</param>
         public void SetBundleLinks(int bundleMinLinks, int bundleMaxLinks)
         {
-            var countOfPorts = base.GetPorts().Count;
+            var countOfPorts = base.Uni.UniAccessLinkIdentifiers.Count();
 
             if (bundleMinLinks < countOfPorts || bundleMinLinks > countOfPorts)
             {
@@ -82,31 +82,6 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
 
             this._bundleMinLinks = bundleMinLinks;
             this._bundleMaxLinks = bundleMaxLinks;
-        }
-
-        public override void AddPorts(AttachmentBandwidth attachmentBandwidth, List<Port> ports)
-        {
-            // Supplied attachment bandwidth must match that set for the attachment
-            if (attachmentBandwidth.Id != this._attachmentBandwidthId)
-            {
-                throw new AttachmentDomainException($"Attachment bandwidth '{attachmentBandwidth.BandwidthGbps}' is not valid for attachment '{this.Name}' ");
-            }
-
-            if (!ports.Any()) throw new AttachmentDomainException($"No ports were found when attempting to add ports for attachment '{this.Name}'");
-            var numPortsExpected = attachmentBandwidth.GetNumberOfPortsRequiredForBundle();
-
-            if (ports.Count > numPortsExpected) throw new AttachmentDomainException($"Expected {numPortsExpected} ports but got {ports.Count} when attempting " +
-            	$"to add ports for attachment '{this.Name}'.");
-
-            var portBandwidthGbpsTotal = ports.Select(port => port.GetPortBandwidthGbps()).Sum();
-            if (portBandwidthGbpsTotal != attachmentBandwidth.BandwidthGbps)
-            {
-                throw new AttachmentDomainException("The total bandwidth of the assigned ports is not compatible with the bandwidth of the attachment.");
-            }
-
-            ports.ForEach(port => this.Interfaces.Single().AddPort(port));
-
-            this.AttachmentStatus = AttachmentStatus.Active;
         }
 
         public int GetBundleMinLinks() => this._bundleMinLinks;

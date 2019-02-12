@@ -7,6 +7,9 @@ namespace MINDOnContainers.Services.Attachment.API.Application.Commands
     public class CreateAttachmentCommand : IRequest<AttachmentDTO>
     {
         [DataMember]
+        public int TenantId { get; private set; }
+
+        [DataMember]
         public string Description { get; private set; }
 
         [DataMember]
@@ -30,9 +33,10 @@ namespace MINDOnContainers.Services.Attachment.API.Application.Commands
         [DataMember]
         public bool? JumboMtuRequired { get; private set; }
 
-        public CreateAttachmentCommand(string locationName, int attachmentRoleId, int attachmentBandwidthGbps, 
+        public CreateAttachmentCommand(int tenantId, string locationName, int attachmentRoleId, int attachmentBandwidthGbps, 
             string description, string notes = null, string planeName = null, bool? bundleRequired = false, bool? jumboMtuRequired = false)
         {
+            TenantId = tenantId;
             LocationName = locationName;
             PlaneName = planeName;
             AttachmentRoleId = attachmentRoleId;

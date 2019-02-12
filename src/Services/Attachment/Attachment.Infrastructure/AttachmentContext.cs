@@ -20,6 +20,7 @@ namespace MINDOnContainers.Services.Attachment.Infrastructure
     { 
         public const string DEFAULT_SCHEMA = "attachment";
 
+        public DbSet<Uni> Unis { get; set; }
         public DbSet<Domain.DomainModels.AttachmentAggregate.Attachment> Attachments { get; set; }
         public DbSet<SingleAttachment> SingleAttachments { get; set; }
         public DbSet<BundleAttachment> BundleAttachments { get; set; }
@@ -31,8 +32,6 @@ namespace MINDOnContainers.Services.Attachment.Infrastructure
         public DbSet<BgpPeer> BgpPeers { get; set; }
         public DbSet<ContractBandwidthPool> ContractBandwidthPools { get; set; }
         public DbSet<Interface> Interfaces { get; set; }
-        public DbSet<Port> Ports { get; set; }
-        public DbSet<RoutingInstance> RoutingInstances { get; set; }
         public DbSet<Vlan> Vlans { get; set; }
 
         private readonly IMediator _mediator;
@@ -51,6 +50,7 @@ namespace MINDOnContainers.Services.Attachment.Infrastructure
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.ApplyConfiguration(new UniEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new AttachmentEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new BundleAttachmentEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VifEntityTypeConfiguration());
@@ -58,11 +58,9 @@ namespace MINDOnContainers.Services.Attachment.Infrastructure
             modelBuilder.ApplyConfiguration(new VifRoleEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new AttachmentRoleEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new AttachmentBandwidthEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new RoutingInstanceEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new Ipv4AddressAndMaskEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VlanEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ContractBandwidthPoolEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new PortEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new BgpPeerEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new AttachmentStatusEntityTypeConfiguration());
         }
@@ -125,7 +123,7 @@ namespace MINDOnContainers.Services.Attachment.Infrastructure
         }
     }
 
-    public class OrderingContextDesignFactory : IDesignTimeDbContextFactory<AttachmentContext>
+    public class AttachmentContextDesignFactory : IDesignTimeDbContextFactory<AttachmentContext>
     {
         public AttachmentContext CreateDbContext(string[] args)
         {

@@ -21,8 +21,13 @@ namespace MINDOnContainers.Services.InfrastructureServices.Sigma.Infrastructure
 
         public DbSet<Domain.DomainModels.SigmaAggregate.Sigma> Sigma { get; set; }
         public DbSet<Device> Devices { get; set; }
+        public DbSet<DeviceStatus> DeviceStatuses { get; set; }
         public DbSet<Port> Ports { get; set; }
         public DbSet<RoutingInstance> RoutingInstances { get; set; }
+        public DbSet<RoutingInstanceType> RoutingInstanceTypes { get; set; }
+        public DbSet<Uni> Unis { get; set; }
+        public DbSet<Plane> Planes { get; set; }
+        public DbSet<PortStatus> PortStatuses { get; set; }
 
         private readonly IMediator _mediator;
         private IDbContextTransaction _currentTransaction;
@@ -41,10 +46,14 @@ namespace MINDOnContainers.Services.InfrastructureServices.Sigma.Infrastructure
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new SigmaEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new UniEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new DeviceEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new DeviceStatusEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new PortEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new PortStatusEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new RoutingInstanceEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new RoutingInstanceTypeEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new PlaneEntityTypeConfiguration());
         }
 
         public async Task<bool> SaveEntitiesAsync(CancellationToken cancellationToken = default(CancellationToken))

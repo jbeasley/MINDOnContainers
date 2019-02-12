@@ -11,8 +11,6 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
         public string Name { get; private set; }
         public int VlanTag { get; private set; }
         private readonly int? _tenantId;
-        private readonly int? _routingInstanceId;
-        private readonly RoutingInstance _routingInstance;
         private readonly int? _contractBandwidthPoolId;
         public ContractBandwidthPool ContractBandwidthPool { get; private set; }
         private readonly int _vifRoleId;
@@ -28,24 +26,13 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
             _networkStatusId = NetworkStatus.Init.Id;
         }
 
-        public Vif(int attachmentId, VifRole role, Mtu mtu, List<Vlan> vlans, int vlanTag, 
-            ContractBandwidthPool contractBandwidthPool = null, int? tenantId = null, bool trustReceivedCosAndDscp = false) : this()
+        public Vif(int attachmentId, int tenantId, VifRole role, Mtu mtu, List<Vlan> vlans, int vlanTag,
+            ContractBandwidthPool contractBandwidthPool = null, bool trustReceivedCosAndDscp = false) : this()
         {
             this._attachmentId = attachmentId;
             this.Name = Guid.NewGuid().ToString("N");
             this._vifRoleId = role.Id;
-
-            // Must have a tenant specified for a tenant-facing vif
-            if (role.IsTenantFacing)
-            {
-                if (!this._tenantId.HasValue)
-                {
-                    throw new ArgumentNullException(nameof(tenantId));
-                }
-
-                this._tenantId = tenantId;
-            }
-
+            this._tenantId = tenantId;
             this.VlanTag = vlanTag;
             this._mtu = mtu ?? throw new ArgumentNullException(nameof(mtu));
             this._mtuId = mtu.Id;

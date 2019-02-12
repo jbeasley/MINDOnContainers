@@ -19,4 +19,7 @@
     <Folder Include="Properties\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="EntityConfigurations\PortEntityTypeConfiguration.cs" />
+  </ItemGroup>
 </Project>

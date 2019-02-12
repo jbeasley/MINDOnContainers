@@ -16,10 +16,8 @@ namespace MINDOnContainers.Services.Attachment.Infrastructure.EntityConfiguratio
                 .ForSqlServerUseSequenceHiLo("vifroleseq", AttachmentContext.DEFAULT_SCHEMA);
 
             vifRoleConfiguration.Property<string>("Name").IsRequired();
-            vifRoleConfiguration.Property<int>("RoutingInstanceTypeId").IsRequired(false);
             vifRoleConfiguration.Property<bool>("RequireRoutingInstance").IsRequired();
             vifRoleConfiguration.Property<int>("IsLayer3Role").IsRequired(false);
-            vifRoleConfiguration.Property<int>("IsTenantFacing").IsRequired();
             vifRoleConfiguration.Property<int>("RequireContractBandwidth").IsRequired();
 
             vifRoleConfiguration.HasOne<Domain.DomainModels.AttachmentRoleAggregate.AttachmentRole>()

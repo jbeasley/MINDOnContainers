@@ -111,7 +111,7 @@
             var eventBus = app.ApplicationServices.GetRequiredService<BuildingBlocks.EventBus.Abstractions.IEventBus>();
 
             // Register imtegration events that we want to subscribe to here
-            eventBus.Subscribe<AttachmentDeviceAndPortsAssignedIntegrationEvent, IIntegrationEventHandler<AttachmentDeviceAndPortsAssignedIntegrationEvent>>();
+            eventBus.Subscribe<UniCreatedIntegrationEvent, IIntegrationEventHandler<UniCreatedIntegrationEvent>>();
         }
 
         protected virtual void ConfigureAuth(IApplicationBuilder app)

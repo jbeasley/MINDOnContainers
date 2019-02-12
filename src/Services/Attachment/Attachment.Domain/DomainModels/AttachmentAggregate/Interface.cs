@@ -10,14 +10,11 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
     {
         private readonly int ipv4AddressAndMaskId;
         public Ipv4AddressAndMask Ipv4AddressAndMask { get; private set; }
-        private readonly List<Port> _ports;
-        public IReadOnlyCollection<Port> Ports => _ports;
         private readonly List<Vlan> _vlans;
         public IReadOnlyCollection<Vlan> Vlans => _vlans;
 
         protected Interface()
         {
-            _ports = new List<Port>();
             _vlans = new List<Vlan>();
         }
 
@@ -36,20 +33,6 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
             {
                 throw new AttachmentDomainException($"Invalid IPv4 address/mask - '{ipv4Address.Ipv4Address}, {ipv4Address.Ipv4SubnetMask}'");
             }
-        }
-
-        /// <summary>
-        /// Add a port
-        /// </summary>
-        /// <param name="port">Port.</param>
-        public void AddPort(Port port) 
-        {
-            if (_ports.Contains(port))
-            {
-                throw new AttachmentDomainException("The port cannot be added to interface because the port already exists.");
-            }
-
-            _ports.Add(port);
         }
 
         /// <summary>

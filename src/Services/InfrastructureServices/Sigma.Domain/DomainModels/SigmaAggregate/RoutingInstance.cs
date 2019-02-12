@@ -15,18 +15,13 @@ namespace MINDOnContainers.Services.InfrastructureServices.Sigma.Domain.DomainMo
         private readonly RouteDistinguisherRange _routeDistinguisherRange;
         private readonly int _routingInstanceTypeId;
         public RoutingInstanceType RoutingInstanceType { get; private set; }
-        private readonly int _deviceId;
         private readonly Device _device;
 
-        protected RoutingInstance()
-        {
-        }
 
         public RoutingInstance(Device device, RoutingInstanceType type, string name = "", int? tenantId = null, 
-        RouteDistinguisherRange range = null, int? administratorSubField = null, int? assignedNumberSubField = null) : this()
+            RouteDistinguisherRange range = null, int? administratorSubField = null, int? assignedNumberSubField = null)
         {
             this._device = device ?? throw new ArgumentNullException(nameof(device));
-            this._deviceId = device.Id;
 
             if (!string.IsNullOrEmpty(name))
             {

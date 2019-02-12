@@ -11,7 +11,12 @@ namespace MINDOnContainers.Services.InfrastructureServices.Sigma.Domain.DomainMo
         private readonly List<Location> _locations;
         public IReadOnlyCollection<Location> Locations=> _locations;
 
-        public SubRegion(int regionId, string name)
+        protected SubRegion()
+        {
+            this._locations = new List<Location>();
+        }
+
+        public SubRegion(int regionId, string name) : this()
         {
             this._regionId = regionId;
             this.Name = name;

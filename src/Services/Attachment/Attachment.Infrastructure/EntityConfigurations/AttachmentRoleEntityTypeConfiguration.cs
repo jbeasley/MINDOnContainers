@@ -18,12 +18,10 @@ namespace MINDOnContainers.Services.Attachment.Infrastructure.EntityConfiguratio
             attachmentRoleConfiguration.Property<string>("Name").IsRequired();
             attachmentRoleConfiguration.Property<bool>("IsLayer3").IsRequired();
             attachmentRoleConfiguration.Property<bool>("IsTaggedRole").IsRequired();
-            attachmentRoleConfiguration.Property<bool>("IsTenantFacing").IsRequired();
             attachmentRoleConfiguration.Property<bool>("RequireContractBandwidth").IsRequired();
             attachmentRoleConfiguration.Property<bool>("SupportedByBundle").IsRequired();
             attachmentRoleConfiguration.Property<bool>("SupportedByMultiPort").IsRequired();
             attachmentRoleConfiguration.Property<bool>("RequireRoutingInstance").IsRequired();
-            attachmentRoleConfiguration.Property<bool>("RoutingInstanceTypeId").IsRequired();
 
             // DDD Patterns comment:
             //Set as field (New since EF 1.1) to access the collection properties through their fields

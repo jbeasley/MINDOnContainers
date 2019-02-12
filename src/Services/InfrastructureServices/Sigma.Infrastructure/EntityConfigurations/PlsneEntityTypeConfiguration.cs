@@ -4,19 +4,19 @@ using MINDOnContainers.Services.InfrastructureServices.Sigma.Domain.DomainModels
 
 namespace MINDOnContainers.Services.InfrastructureServices.Sigma.Infrastructure.EntityConfigurations
 {
-    class PortStatusEntityTypeConfiguration : IEntityTypeConfiguration<PortStatus>
+    class PlaneEntityTypeConfiguration : IEntityTypeConfiguration<Plane>
     {
-        public void Configure(EntityTypeBuilder<PortStatus> portStatusConfiguration)
+        public void Configure(EntityTypeBuilder<Plane> planeConfiguration)
         {
-            portStatusConfiguration.ToTable("portStatus", SigmaContext.DEFAULT_SCHEMA);
-            portStatusConfiguration.HasKey(o => o.Id);
+            planeConfiguration.ToTable("plane", SigmaContext.DEFAULT_SCHEMA);
+            planeConfiguration.HasKey(o => o.Id);
 
-            portStatusConfiguration.Property(o => o.Id)
+            planeConfiguration.Property(o => o.Id)
                 .HasDefaultValue(1)
                 .ValueGeneratedNever()
                 .IsRequired();
 
-            portStatusConfiguration.Property(o => o.Name)
+            planeConfiguration.Property(o => o.Name)
                 .HasMaxLength(200)
                 .IsRequired();                
         }

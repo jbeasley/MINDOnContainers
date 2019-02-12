@@ -21,8 +21,6 @@ namespace MINDOnContainers.Services.Attachment.Infrastructure.EntityConfiguratio
             //Set as field (New since EF 1.1) to access the collection properties through their fields
             var vlansNavigation = interfaceConfiguration.Metadata.FindNavigation(nameof(Interface.Vlans));
             vlansNavigation.SetPropertyAccessMode(PropertyAccessMode.Field);
-            var portsNavigation = interfaceConfiguration.Metadata.FindNavigation(nameof(Interface.Ports));
-            portsNavigation.SetPropertyAccessMode(PropertyAccessMode.Field);
 
             interfaceConfiguration.HasOne<Ipv4AddressAndMask>()
                 .WithOne()

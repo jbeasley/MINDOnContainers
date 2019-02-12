@@ -64,6 +64,6 @@
     <Folder Include="Application\IntegrationEvents\Commands\" />
     <Folder Include="Exceptions\" />
     <Folder Include="Application\DomainEventHandlers\" />
-    <Folder Include="Application\DomainEventHandlers\DeviceAndPortsAssigned\" />
+    <Folder Include="Application\DomainEventHandlers\UniCreated\" />
   </ItemGroup>
 </Project>

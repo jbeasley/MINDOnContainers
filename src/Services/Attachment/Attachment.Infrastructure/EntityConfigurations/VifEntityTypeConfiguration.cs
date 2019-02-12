@@ -20,12 +20,10 @@ namespace MINDOnContainers.Services.Attachment.Infrastructure.EntityConfiguratio
             vifConfiguration.Property<string>("Name").IsRequired();
             vifConfiguration.Property<bool>("IsLayer3").IsRequired();
             vifConfiguration.Property<int>("TenantId").IsRequired(false);
-            vifConfiguration.Property<int>("RoutingInstanceId").IsRequired(false);
             vifConfiguration.Property<int>("VifRoleId").IsRequired();
             vifConfiguration.Property<int>("AttachmentId").IsRequired();
             vifConfiguration.Property<int>("NetworkStatusId").IsRequired(false);
             vifConfiguration.Property<int>("MtuId").IsRequired(true);
-            vifConfiguration.Property<bool>("Created").IsRequired();
 
             // DDD Patterns comment:
             //Set as field (New since EF 1.1) to access the collection properties through their fields
@@ -36,12 +34,6 @@ namespace MINDOnContainers.Services.Attachment.Infrastructure.EntityConfiguratio
                 .WithMany()
                 .IsRequired()
                 .HasForeignKey("AttachmentId");
-
-            vifConfiguration.HasOne<RoutingInstance>()
-                .WithMany()
-                .HasForeignKey("RoutingInstanceId")
-                .IsRequired(false)
-                .OnDelete(DeleteBehavior.Restrict);
 
             vifConfiguration.HasOne<ContractBandwidthPool>()
                 .WithMany()

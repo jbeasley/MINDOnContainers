@@ -11,10 +11,6 @@ namespace MINDOnContainers.Services.InfrastructureServices.Sigma.Domain.DomainMo
         public static RoutingInstanceType Default = new RoutingInstanceType(1, nameof(Default).ToLowerInvariant());
         public static RoutingInstanceType Vrf = new RoutingInstanceType(2, nameof(Vrf).ToLowerInvariant());
        
-        protected RoutingInstanceType()
-        {
-        }
-
         public RoutingInstanceType(int id, string name) : base(id, name)
         {
         }

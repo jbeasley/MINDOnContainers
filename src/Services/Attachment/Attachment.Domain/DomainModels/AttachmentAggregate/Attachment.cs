@@ -10,6 +10,7 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
 {
     public abstract class Attachment : Entity, IAggregateRoot
     {
+        public Uni Uni { get; private set; }
         public string Name { get; private set; }
         private string _description;
         private string _notes;
@@ -17,9 +18,6 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
         private readonly string _planeName;
         private int? _tenantId;
         protected readonly int _attachmentBandwidthId;    
-        private int _deviceId;
-        private int _routingInstanceId;
-        public RoutingInstance RoutingInstance { get; private set; }
         public ContractBandwidthPool ContractBandwidthPool { get; private set; }
         private readonly int _attachmentRoleId;
         private readonly int _mtuId;
@@ -36,16 +34,14 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
         {
             _interfaces = new List<Interface>();
             _vifs = new List<Vif>();
-            _attachmentStatusId = AttachmentStatus.Initialised.Id;
-            AttachmentStatus = AttachmentStatus.Initialised;
             _networkStatusId = NetworkStatus.Init.Id;
         }
 
-        protected Attachment(string locationName, string description, string notes, AttachmentBandwidth attachmentBandwidth, 
-            AttachmentRole role, bool enableJumboMtu, string planeName = null, int? tenantId = null) : this()
+        protected Attachment(int tenantId, string locationName, string description, string notes, AttachmentBandwidth attachmentBandwidth, 
+            AttachmentRole role, bool enableJumboMtu, string planeName = null) : this()
         {
+            this._tenantId = tenantId;
             this._attachmentRoleId = role.Id;
-
             this._locationName = locationName;
             this.Name = Guid.NewGuid().ToString("N");
             this._attachmentBandwidthId = attachmentBandwidth?.Id ?? throw new ArgumentNullException(nameof(attachmentBandwidth));
@@ -54,43 +50,21 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
             this._notes = notes;
             _mtuId = enableJumboMtu ? Mtu.m9000.Id : Mtu.m1500.Id;
             this._planeName = planeName;
-
-            SetTenantId(role, tenantId);
         }
 
         public void SetDescription(string description) => this._description = description;
         public void SetNotes(string notes) => this._notes = notes;
         public void SetMtu(Mtu mtu) => this.Mtu = mtu;
         public List<ContractBandwidthPool> GetContractBandwidthPools() => this.Vifs.Select(vif => vif.ContractBandwidthPool).ToList();
-        public void SetDeviceId(int deviceId) => _deviceId = deviceId;
         public string GetLocationName() => this._locationName;
         public string GetPlaneName() => this._planeName;
-
-        public void SetAttachmentRoutingInstance(string name, int? administratorSubField, int? assignedNumberSubField)
-        {      
-            var routingInstance = new RoutingInstance(this._deviceId, name, administratorSubField, assignedNumberSubField);
-            this.RoutingInstance = routingInstance;        
-        }
-
-        public RoutingInstance GetRoutingInstance() => this.RoutingInstance;
-
         public int GetAttachmentBandwidthId() => this._attachmentBandwidthId;
 
-        protected void SetTenantId(AttachmentRole role, int? tenantId = null)
+        public void SetUni(string uniName, List<string> uniAccessLinkIdentifiers, int? routingInstanceId = null)
         {
-            // Must have a tenant specified for a tenant-facing attachment
-            if (role.IsTenantFacing)
-            {
-                if (!_tenantId.HasValue)
-                {
-                    throw new ArgumentNullException(nameof(tenantId));
-                }
-
-                this._tenantId = tenantId;
-            }
+            this.Uni = new Uni(uniName, uniAccessLinkIdentifiers, routingInstanceId: routingInstanceId);
+            this.AttachmentStatus = AttachmentStatus.Active;
         }
-
-        public abstract void AddPorts(AttachmentBandwidth attachmentBandwidth, List<Port> ports);
 
         /// <summary>
         /// Adds a vif to the attachment.
@@ -103,9 +77,9 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
         /// <param name="ipv4Addresses">Ipv4 addresses to be assigned to the layer 3 vif.</param>
         /// <param name="tenantId">Tenant identifier denoting the tenant for which the vif is assigned</param>
         /// <param name="vlanTag">Vlan tag to be assigned to the vif. It not provided one will be assigned.</param>
-        public void AddVif(VifRole role, VlanTagRange vlanTagRange, Mtu mtu,
+        public void AddVif(int tenantId, VifRole role, VlanTagRange vlanTagRange, Mtu mtu,
             ContractBandwidthPool contractBandwidthPool, AttachmentBandwidth attachmentBandwidth, ContractBandwidth contractBandwidth,
-            List<Ipv4AddressAndMask> ipv4Addresses, bool trustReceivedCosAndDscp = false, int? tenantId = null, int? vlanTag = null)
+            List<Ipv4AddressAndMask> ipv4Addresses, bool trustReceivedCosAndDscp = false, int? vlanTag = null)
         {
             // The supplied vif role must be compatible with the attachment
             if (role.AttachmentRole.Id != this._attachmentRoleId)
@@ -176,8 +150,8 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
                 contractBandwidthPool = new ContractBandwidthPool(contractBandwidth, trustReceivedCosAndDscp, tenantId);
             }
 
-            var vif = new Vif(this.Id, role, mtu, vlans, vlanTag.Value, 
-                contractBandwidthPool, tenantId, trustReceivedCosAndDscp);
+            var vif = new Vif(this.Id, tenantId, role, mtu, vlans, vlanTag.Value, 
+                contractBandwidthPool, trustReceivedCosAndDscp);
                 
             this._vifs.Add(vif);
         }
@@ -241,15 +215,6 @@ namespace MINDOnContainers.Services.Attachment.Domain.DomainModels.AttachmentAgg
             }
 
             return vlans;
-        }
-
-        /// <summary>
-        /// Gets the ports assigned to the attachment.
-        /// </summary>
-        /// <returns>The ports.</returns>
-        protected List<Port> GetPorts()
-        {
-            return this._interfaces.SelectMany(@interface => @interface.Ports).ToList();
         }
 
         /// <summary>

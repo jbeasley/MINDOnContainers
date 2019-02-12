@@ -20,16 +20,8 @@ namespace MINDOnContainers.Services.Attachment.Infrastructure.EntityConfiguratio
             bgpPeerConfiguration.Property<string>("PeerPasssword").IsRequired();
             bgpPeerConfiguration.Property<int>("Peer2ByteAutonomousSystem").IsRequired();
             bgpPeerConfiguration.Property<int>("MaximumRoutes").IsRequired();
-            bgpPeerConfiguration.Property<int>("RoutingInstanceId").IsRequired();
             bgpPeerConfiguration.Property<bool>("IsBfdEnabled").IsRequired();
             bgpPeerConfiguration.Property<bool>("IsMultiHopEnabled").IsRequired();
-
-
-            bgpPeerConfiguration.HasOne<RoutingInstance>()
-                .WithMany()
-                .HasForeignKey("RoutingInstanceId")
-                .IsRequired(false)
-                .OnDelete(DeleteBehavior.Restrict);
                 
         }
     }

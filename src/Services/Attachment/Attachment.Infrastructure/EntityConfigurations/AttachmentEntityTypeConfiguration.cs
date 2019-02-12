@@ -14,14 +14,11 @@ namespace MINDOnContainers.Services.Attachment.Infrastructure.EntityConfiguratio
 
             attachmentConfiguration.Property(o => o.Id)
                 .ForSqlServerUseSequenceHiLo("attachmentseq", AttachmentContext.DEFAULT_SCHEMA);
-
+                
             attachmentConfiguration.Property<string>("Name").IsRequired();
             attachmentConfiguration.Property<string>("Description").IsRequired();
             attachmentConfiguration.Property<string>("Notes").IsRequired(false);
-            attachmentConfiguration.Property<bool>("IsTagged").IsRequired();
-            attachmentConfiguration.Property<bool>("IsLayer3").IsRequired();
             attachmentConfiguration.Property<int>("TenantId").IsRequired(false);
-            attachmentConfiguration.Property<int>("RoutingInstanceId").IsRequired(false);
             attachmentConfiguration.Property<int>("AttachmentRoleId").IsRequired();
             attachmentConfiguration.Property<int>("DeviceId").IsRequired();
             attachmentConfiguration.Property<int>("NetworkStatusId").IsRequired();
@@ -35,16 +32,16 @@ namespace MINDOnContainers.Services.Attachment.Infrastructure.EntityConfiguratio
             vifsNavigation.SetPropertyAccessMode(PropertyAccessMode.Field);
             var interfacesNavigation = attachmentConfiguration.Metadata.FindNavigation(nameof(Domain.DomainModels.AttachmentAggregate.Attachment.Interfaces));
             interfacesNavigation.SetPropertyAccessMode(PropertyAccessMode.Field);
-                
-            attachmentConfiguration.HasOne<RoutingInstance>()
-                .WithMany()
-                .HasForeignKey("RoutingInstanceId")
-                .IsRequired(false)
-                .OnDelete(DeleteBehavior.Restrict);
 
             attachmentConfiguration.HasOne<ContractBandwidthPool>()
                 .WithMany()
                 .HasForeignKey("ContractBandwidthPoolId")
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            attachmentConfiguration.HasOne<Uni>()
+                .WithOne()
+                .HasForeignKey("UniId")
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
         }

@@ -38,7 +38,7 @@ namespace MINDOnContainers.Services.Attachment.Infrastructure.Repositories
                 await _context.Entry(attachment)
                     .Collection(i => i.Interfaces).LoadAsync();
                 await _context.Entry(attachment)
-                    .Reference(i => i.RoutingInstance).LoadAsync();
+                    .Reference(i => i.Uni).LoadAsync();
             }
 
             return attachment;

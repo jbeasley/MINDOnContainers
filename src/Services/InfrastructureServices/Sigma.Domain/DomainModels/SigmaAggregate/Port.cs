@@ -6,26 +6,30 @@ namespace MINDOnContainers.Services.InfrastructureServices.Sigma.Domain.DomainMo
 {
     public class Port : Entity
     {
-        private readonly int _statusId;
+        private readonly string _name;
+        private readonly string _localDeviceIdentifier;
         private PortStatus _status;
         private readonly int _portBandwidthGbps;
         private int? _tenantId;
         private int? _attachmentId;
         private readonly int _portPoolId;
 
-        public Port(PortStatus status, int portBandwidthGbps, int portPoolId)
+        public Port(string localDeviceIdentifier, PortStatus status, int portBandwidthGbps, int portPoolId)
         {
             if (portBandwidthGbps <= 0)
             {
                 throw new SigmaDomainException("The port bandwidth must be greater than 0.");
             }
 
-            _status = status ?? throw new ArgumentNullException(nameof(status));
-            _statusId = status.Id;
-            _portBandwidthGbps = portBandwidthGbps;
-            _portPoolId = portPoolId;
+            this._name = Guid.NewGuid().ToString("N");
+            if (string.IsNullOrEmpty(localDeviceIdentifier)) throw new ArgumentNullException(nameof(localDeviceIdentifier));
+            this._localDeviceIdentifier = localDeviceIdentifier;
+            this._status = status ?? throw new ArgumentNullException(nameof(status));
+            this._portBandwidthGbps = portBandwidthGbps;
+            this._portPoolId = portPoolId;
         }
 
+        public string GetPortName() => _name;
         public int GetPortBandwidthGbps() => _portBandwidthGbps;
         public PortStatus GetPortStatus() => _status;
         public int GetPortPoolId() => _portPoolId;
