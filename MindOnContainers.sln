@@ -1,0 +1,86 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Attachment.API", "src\Services\Attachment\Attachment.API\Attachment.API.csproj", "{BBDF1660-EA50-4455-B77D-38A76EB57459}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Attachment.Domain", "src\Services\Attachment\Attachment.Domain\Attachment.Domain.csproj", "{B70408EA-7B40-40D5-9032-7FA9E114B6C5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Attachment.Infrastructure", "src\Services\Attachment\Attachment.Infrastructure\Attachment.Infrastructure.csproj", "{DE5999E6-E41B-46A0-B52E-2B7723C57C68}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventBus", "src\BuildingBlocks\EventBus\EventBus\EventBus.csproj", "{7D20B379-7A08-4499-BDFF-94CC9F4566B7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventBusRabbitMQ", "src\BuildingBlocks\EventBus\EventBusRabbitMQ\EventBusRabbitMQ.csproj", "{FF2557E6-7A8E-46B8-9F0E-A1B78976E5A2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationEventLogEF", "src\BuildingBlocks\EventBus\IntegrationEventLogEF\IntegrationEventLogEF.csproj", "{A2105738-076C-4EF0-A9C5-68D7AFA842F8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sigma.Domain", "src\Services\InfrastructureServices\Sigma.Domain\Sigma.Domain.csproj", "{68D8631C-EE70-406D-B2E1-4CAFB657DD05}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sigma.Infrastructure", "src\Services\InfrastructureServices\Sigma.Infrastructure\Sigma.Infrastructure.csproj", "{3EA8E9F1-6DFA-4F78-8EDE-7B78AF4CF143}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sigma.API", "src\Services\InfrastructureServices\Sigma.API\Sigma.API.csproj", "{04D03D60-8E69-4B80-BF31-8C50241FA84C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{31BCCB15-19D0-416B-B145-CCA0934AA7AB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebHost.Customization", "src\BuildingBlocks\WebHostCustomization\WebHost.Customization\WebHost.Customization.csproj", "{5EF9DA72-EC89-42C9-96C9-0CD8C32B07B5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BBDF1660-EA50-4455-B77D-38A76EB57459}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BBDF1660-EA50-4455-B77D-38A76EB57459}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BBDF1660-EA50-4455-B77D-38A76EB57459}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BBDF1660-EA50-4455-B77D-38A76EB57459}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B70408EA-7B40-40D5-9032-7FA9E114B6C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B70408EA-7B40-40D5-9032-7FA9E114B6C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B70408EA-7B40-40D5-9032-7FA9E114B6C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B70408EA-7B40-40D5-9032-7FA9E114B6C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE5999E6-E41B-46A0-B52E-2B7723C57C68}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE5999E6-E41B-46A0-B52E-2B7723C57C68}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE5999E6-E41B-46A0-B52E-2B7723C57C68}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE5999E6-E41B-46A0-B52E-2B7723C57C68}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D20B379-7A08-4499-BDFF-94CC9F4566B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D20B379-7A08-4499-BDFF-94CC9F4566B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D20B379-7A08-4499-BDFF-94CC9F4566B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D20B379-7A08-4499-BDFF-94CC9F4566B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF2557E6-7A8E-46B8-9F0E-A1B78976E5A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF2557E6-7A8E-46B8-9F0E-A1B78976E5A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF2557E6-7A8E-46B8-9F0E-A1B78976E5A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF2557E6-7A8E-46B8-9F0E-A1B78976E5A2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2105738-076C-4EF0-A9C5-68D7AFA842F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2105738-076C-4EF0-A9C5-68D7AFA842F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2105738-076C-4EF0-A9C5-68D7AFA842F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2105738-076C-4EF0-A9C5-68D7AFA842F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{68D8631C-EE70-406D-B2E1-4CAFB657DD05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68D8631C-EE70-406D-B2E1-4CAFB657DD05}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68D8631C-EE70-406D-B2E1-4CAFB657DD05}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68D8631C-EE70-406D-B2E1-4CAFB657DD05}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3EA8E9F1-6DFA-4F78-8EDE-7B78AF4CF143}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3EA8E9F1-6DFA-4F78-8EDE-7B78AF4CF143}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3EA8E9F1-6DFA-4F78-8EDE-7B78AF4CF143}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3EA8E9F1-6DFA-4F78-8EDE-7B78AF4CF143}.Release|Any CPU.Build.0 = Release|Any CPU
+		{04D03D60-8E69-4B80-BF31-8C50241FA84C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04D03D60-8E69-4B80-BF31-8C50241FA84C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04D03D60-8E69-4B80-BF31-8C50241FA84C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{04D03D60-8E69-4B80-BF31-8C50241FA84C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5EF9DA72-EC89-42C9-96C9-0CD8C32B07B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5EF9DA72-EC89-42C9-96C9-0CD8C32B07B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5EF9DA72-EC89-42C9-96C9-0CD8C32B07B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5EF9DA72-EC89-42C9-96C9-0CD8C32B07B5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		Policies = $0
+		$0.DotNetNamingPolicy = $1
+		$1.DirectoryNamespaceAssociation = PrefixedHierarchical
+		$0.TextStylePolicy = $2
+		$2.FileWidth = 80
+		$2.TabsToSpaces = True
+		$2.scope = text/x-csharp
+		$0.CSharpFormattingPolicy = $3
+		$3.scope = text/x-csharp
+	EndGlobalSection
+EndGlobal
